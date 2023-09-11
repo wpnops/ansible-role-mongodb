@@ -1,0 +1,6 @@
+---
+_mongodb_package_default:
+  default:
+    - mongodb
+
+mongodb_state: present
