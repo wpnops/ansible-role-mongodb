@@ -41,6 +41,8 @@ jobs:
 
       - name: lint code
         run: |
+          set -e
+          poetry run yamllint .
           poetry run molecule syntax
 
   molecule:
