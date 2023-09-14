@@ -3,3 +3,5 @@ roles:
   - nephelaiio.plugins
 collections:
   - community.general
+  - community.mongodb
+  - ansible.utils
