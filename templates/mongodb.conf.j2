@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+net:
+  port: {{ mongodb_port }}
+  bindIp: {{ mongodb_bindip }}
+systemLog:
+  path: {{ mongodb_log_path }}
+  logAppend: true
+  destination: file
+storage:
+  dbPath: {{ mongodb_storage_dbpath }}
+  journal:
+    enabled: true
+    commitIntervalMs: 100
+replication:
+  replSetName: {{ mongodb_replicaset_name }}

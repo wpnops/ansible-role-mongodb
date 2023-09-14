@@ -7,7 +7,27 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instance
+  - name: mongodb1
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb2
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb3
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
@@ -19,5 +39,13 @@ platforms:
       - /opt
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: ansible.posix.profile_tasks
+  inventory:
+    hosts:
+      all:
+        vars:
+          mongodb_replicaset_name: test
 verifier:
   name: ansible

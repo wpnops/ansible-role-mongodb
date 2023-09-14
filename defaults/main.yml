@@ -1,6 +1,22 @@
 ---
-_mongodb_package_default:
-  default:
-    - mongodb
-
-mongodb_state: present
+mongodb_packages:
+  - software-properties-common
+  - apt-transport-https
+  - ca-certificates
+  - ufw
+  - mongodb-org
+mongodb_pip_packages:
+  - pymongo
+  - python-gnupg
+mongodb_release: 7.0
+mongodb_service: mongod
+mongodb_port: '27017'
+mongodb_user: mongodb
+mongodb_group: mongodb
+mongodb_config_path: /etc/mongod.conf
+mongodb_bindip: "127.0.0.1,{{ ansible_default_ipv4.address }},{{ inventory_hostname }}"
+mongodb_log_path: /var/log/mongodb/mongodb.log
+mongodb_storage_dbpath: /var/lib/mongodb
+mongodb_replicaset_name: rs0
+mongodb_members: []
+mongodb_replicaset_members: []

@@ -1,19 +1,163 @@
 ---
-- name: include variable overrides
-  set_fact:
-    _mongodb_package: "{{ mongodb_package | default(_mongodb_package_default | sorted_get(overrides)) }}"
-  vars:
-    overrides:
-      - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}"
-      - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-      - "{{ ansible_distribution | lower }}"
-      - "{{ ansible_os_family | lower }}"
-      - "default"
-  tags:
-    - always
+- name: verify mongodb prerequesites
+  tags: always
+  block:
 
-- name: install mongodb package
-  become: yes
-  package:
-    name: "{{ _mongodb_package }}"
-    state: "{{ mongodb_state }}"
+    - name: verify mongodb packages
+      ansible.builtin.meta: end_play
+      when: mongodb_packages | default([]) | length == 0
+
+    - name: verify mongodb pip packages
+      ansible.builtin.meta: end_play
+      when: mongodb_pip_packages | default([]) | length == 0
+
+    - name: verify mongodb release
+      ansible.builtin.meta: end_play
+      when: mongodb_release | default('') == ''
+
+    - name: verify os support
+      ansible.builtin.meta: end_play
+      when: ansible_distribution | lower != 'ubuntu'
+
+    - name: install mongodb pip packages
+      ansible.builtin.pip:
+        name: "{{ mongodb_pip_packages }}"
+
+    - name: install mongodb pre-requisites
+      ansible.builtin.apt:
+        name:
+          - gpg-agent
+          - gnupg
+
+- name: manage mongodb
+  tags: install
+  block:
+
+    - name: install mongodb packages
+      when: "'mongodb-org' in mongodb_packages"
+      block:
+
+        - name: install mongodb apt key
+          ansible.builtin.apt_key:
+            url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_release }}.asc"
+
+        - name: clean apt repository
+          ansible.builtin.file:
+            state: absent
+            path: /etc/apt/sources.list.d/mongodb.list
+          changed_when: false
+
+        - name: add apt repository
+          ansible.builtin.apt_repository:
+            filename: mongodb
+            repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_release }} multiverse"
+          changed_when: false
+
+    - name: install mongodb packages
+      ansible.builtin.apt:
+        name: "{{ mongodb_packages }}"
+        update_cache: yes
+
+    - name: configure mongodb
+      tags: configure
+      block:
+
+        - name: configure mongodb
+          ansible.builtin.template:
+            src: mongodb.conf.j2
+            dest: "{{ mongodb_config_path }}"
+            owner: "{{ mongodb_user }}"
+            group: "{{ mongodb_group }}"
+          notify: restart mongodb
+
+        - name: test if ufw is present and enabled
+          ansible.builtin.shell: systemctl show ufw --property=ActiveState
+          changed_when: false
+          failed_when: false
+          register: ufw_activestate
+
+        - name: manage firewall
+          when: ufw_activestate.stdout == "ActiveState=active"
+          block:
+
+            - name: configure ssh firewall access
+              community.general.ufw:
+                state: enabled
+                from: any
+                to_port: '22'
+                proto: tcp
+                rule: allow
+
+            - name: configure snmp firewall access
+              community.general.ufw:
+                state: enabled
+                from: any
+                to_port: '161'
+                proto: any
+                rule: allow
+
+            - name: configure mongodb firewall access
+              community.general.ufw:
+                state: enabled
+                from: "{{ item }}"
+                port: "{{ mongodb_port }}"
+                rule: allow
+              loop: "{{ mongodb_members }}"
+              when: item != ansible_default_ipv4.address
+
+        - name: manage mongodb service
+          ansible.builtin.service:
+            name: "{{ mongodb_service }}"
+            state: started
+            enabled: yes
+
+    - name: flush handlers
+      ansible.builtin.meta: flush_handlers
+      tags: always
+
+    - name: manage mongodb replicaset
+      tags:
+        - configure
+        - replicaset
+      when:
+        - mongodb_replicaset_name | default('') != ''
+        - mongodb_replicaset_members | default([]) | length > 2
+      block:
+
+        - name: create mongodb replica set
+          community.mongodb.mongodb_replicaset:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            members: "{{ mongodb_replicaset_members }}"
+            validate: no
+          run_once: yes
+
+        - name: retrieve mongodb replicaset status
+          community.mongodb.mongodb_status:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            validate: minimal
+            poll: 5
+            interval: 10
+          register: mongodb_rs
+          run_once: yes
+
+        - name: determine mongodb replicaset primary
+          ansible.builtin.set_fact:
+            replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_host }}"
+          vars:
+            _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
+            _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
+            _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('split_with', ':') | map('first') }}"
+            _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
+
+        - name: reconfigure mongodb replica set
+          community.mongodb.mongodb_replicaset:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            members: "{{ mongodb_replicaset_members }}"
+            reconfigure: yes
+            validate: no
+          when: replicaset_primary != ""
+
+        - name: set slave ok for replica set
+          ansible.builtin.command: mongo --eval "rs.secondaryOk()"
+          changed_when: false
+          run_once: yes
