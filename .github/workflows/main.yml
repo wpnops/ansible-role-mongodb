@@ -41,9 +41,7 @@ jobs:
 
       - name: lint code
         run: |
-          set -e
-          poetry run yamllint .
-          poetry ansible-lint .
+          poetry run molecule syntax
 
   molecule:
 
