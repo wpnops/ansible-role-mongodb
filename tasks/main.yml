@@ -13,7 +13,7 @@
 
     - name: verify mongodb release
       ansible.builtin.meta: end_play
-      when: mongodb_release | default('') == ''
+      when: not mongodb_release
 
     - name: verify os support
       ansible.builtin.meta: end_play
@@ -70,14 +70,11 @@
             group: "{{ mongodb_group }}"
           notify: restart mongodb
 
-        - name: test if ufw is present and enabled
-          ansible.builtin.shell: systemctl show ufw --property=ActiveState
-          changed_when: false
-          failed_when: false
-          register: ufw_activestate
+        - name: gather service facts
+          ansible.builtin.service_facts:
 
         - name: manage firewall
-          when: ufw_activestate.stdout == "ActiveState=active"
+          when: services.ufw.state | default('stopped') == "stopped"
           block:
 
             - name: configure ssh firewall access
@@ -155,7 +152,7 @@
             members: "{{ mongodb_replicaset_members }}"
             reconfigure: yes
             validate: no
-          when: replicaset_primary != ""
+          when: not replicaset_primary
 
         - name: set slave ok for replica set
           ansible.builtin.command: mongo --eval "rs.secondaryOk()"

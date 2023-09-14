@@ -43,6 +43,7 @@ jobs:
         run: |
           set -e
           poetry run yamllint .
+          poetry run ansible-lint .
           poetry run molecule syntax
 
   molecule:
