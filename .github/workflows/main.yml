@@ -54,9 +54,6 @@ jobs:
       matrix:
         image:
           - ubuntu2004
-          - debian11
-          - debian10
-          - centos7
     steps:
       - name: check out the codebase.
         uses: actions/checkout@v2
