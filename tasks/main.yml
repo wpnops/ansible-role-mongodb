@@ -35,7 +35,7 @@
 
         - name: install mongodb apt key
           ansible.builtin.apt_key:
-            url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_release }}.asc"
+            url: "https://pgp.mongodb.com/server-{{ mongodb_release }}.asc"
 
         - name: clean apt repository
           ansible.builtin.file:
@@ -46,7 +46,7 @@
         - name: add apt repository
           ansible.builtin.apt_repository:
             filename: mongodb
-            repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_release }} multiverse"
+            repo: "{{ mongodb_package_repo }}"
           changed_when: false
 
     - name: install mongodb packages
@@ -92,8 +92,8 @@
             - name: configure mongodb firewall access
               community.general.ufw:
                 state: enabled
-                from: "{{ _network_address }}"
-                port: "{{ mongodb_port }}"
+                from: "{{ _address_block }}"
+                port: "27017:27020"
                 proto: tcp
                 rule: allow
               vars:
