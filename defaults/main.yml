@@ -1,11 +1,17 @@
 ---
-mongodb_packages:
-  - software-properties-common
-  - apt-transport-https
-  - ca-certificates
-  - ufw
-  - mongodb-org
-  - mongodb-mongosh
+mongodb_packages_default:
+  debian:
+    - software-properties-common
+    - apt-transport-https
+    - ca-certificates
+    - ufw
+    - mongodb-org
+    - mongodb-mongosh
+  redhat:
+    - ca-certificates
+    - ufw
+    - mongodb-org
+    - mongodb-mongosh
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
