@@ -8,7 +8,6 @@ systemLog:
 storage:
   dbPath: {{ mongodb_storage_dbpath }}
   journal:
-    enabled: true
     commitIntervalMs: 100
 replication:
   replSetName: {{ mongodb_replicaset_name }}

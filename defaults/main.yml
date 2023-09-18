@@ -9,7 +9,7 @@ mongodb_packages:
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
-mongodb_release: 4.4
+mongodb_release: 7.0
 mongodb_service: mongod
 mongodb_port: '27017'
 mongodb_user: mongodb
