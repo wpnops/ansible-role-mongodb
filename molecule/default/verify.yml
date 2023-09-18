@@ -9,6 +9,11 @@
 
     - nephelaiio.plugins
 
+  vars:
+
+    mongodb_test:
+      name: "Test"
+
   tasks:
 
     - name: retrieve mongodb replicaset status
@@ -30,13 +35,13 @@
         _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
     - name: evaluate mongodb shell commands
-      when: replicaset_primary != ""
+      when: replicaset_primary
       block:
 
         - name: create mongodb test database
           community.mongodb.mongodb_shell:
             login_database: "testdb"
-            eval: "db.test.insert({name: 'Test'})"
+            eval: "db.test.insert({{ mongodb_test }})"
           register: mongodb_shell_output
 
         - name: list mongodb databases
@@ -49,8 +54,8 @@
         - name: find mongodb test database metadata
           community.mongodb.mongodb_shell:
             login_database: "testdb"
-            eval: "db.test.find()"
-          failed_when: mongodb_shell_output.transformed_output['name'] | lower != 'test'
+            eval: "db.test.find({{ mongodb_test }}).toArray()"
+          failed_when: mongodb_shell_output.transformed_output | length == 0
           changed_when: false
           register: mongodb_shell_output
 

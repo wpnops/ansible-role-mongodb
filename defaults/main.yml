@@ -5,6 +5,7 @@ mongodb_packages:
   - ca-certificates
   - ufw
   - mongodb-org
+  - mongodb-mongosh
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
