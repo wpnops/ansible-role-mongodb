@@ -19,11 +19,18 @@
       ansible.builtin.pip:
         name: "{{ mongodb_pip_packages }}"
 
-    - name: install mongodb pre-requisites
+    - name: install mongodb pre-requisites for debian
       ansible.builtin.apt:
         name:
           - gpg-agent
           - gnupg
+      when: ansible_os_family | lower == "debian"
+
+    - name: install mongodb pre-requisites for redhat
+      ansible.builtin.yum:
+        name:
+          - gnupg2
+      when: ansible_os_family | lower == "redhat"
 
 - name: manage mongodb
   tags: install
@@ -33,26 +40,50 @@
       when: "'mongodb-org' in mongodb_packages"
       block:
 
-        - name: install mongodb apt key
-          ansible.builtin.apt_key:
-            url: "https://pgp.mongodb.com/server-{{ mongodb_release }}.asc"
+        - name: install mongodb in redhat
+          when: ansible_os_family | lower == "redhat"
+          block:
 
-        - name: clean apt repository
-          ansible.builtin.file:
-            state: absent
-            path: /etc/apt/sources.list.d/mongodb.list
-          changed_when: false
+            - name: install mongodb yum key
+              ansible.builtin.yum_repository:
+                name: MongoDB Repository
+                description: MongoDB Repository
+                baseurl: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_release }}/{{ ansible_architecture }}/"
+                enabled: yes
+                gpgcheck: yes
+                gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_release }}.asc"
 
-        - name: add apt repository
-          ansible.builtin.apt_repository:
-            filename: mongodb
-            repo: "{{ mongodb_package_repo }}"
-          changed_when: false
+        - name: install mongodb in debian
+          when: ansible_os_family | lower == "debian"
+          block:
+
+            - name: install mongodb apt key
+              ansible.builtin.apt_key:
+                url: "https://pgp.mongodb.com/server-{{ mongodb_release }}.asc"
+
+            - name: clean apt repository
+              ansible.builtin.file:
+                state: absent
+                path: /etc/apt/sources.list.d/mongodb.list
+              changed_when: false
+
+            - name: add apt repository
+              ansible.builtin.apt_repository:
+                filename: mongodb
+                repo: "{{ _mongodb_repo }}"
+              vars:
+                _mongodb_package_repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt"
+                _mongodb_ubuntu_repo: "{{ _mongodb_package_repo }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }}"
+                _mongodb_repo: "{{ _mongodb_ubuntu_repo }}/mongodb-org/{{ mongodb_release }} multiverse"
+              changed_when: false
+
+            - name: update apt repos
+              ansible.builtin.apt:
+                update_cache: yes
 
     - name: install mongodb packages
-      ansible.builtin.apt:
+      ansible.builtin.package:
         name: "{{ mongodb_packages }}"
-        update_cache: yes
 
     - name: configure mongodb
       tags: configure

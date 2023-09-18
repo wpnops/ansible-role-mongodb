@@ -21,4 +21,3 @@ mongodb_storage_dbpath: /var/lib/mongodb
 mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_members: []
-mongodb_package_repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/{{ ansible_distribution | lower }} {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_release }} multiverse"
