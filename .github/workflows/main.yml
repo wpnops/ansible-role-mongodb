@@ -55,6 +55,7 @@ jobs:
         image:
           - ubuntu2004
     steps:
+
       - name: check out the codebase.
         uses: actions/checkout@v2
         with:
@@ -70,6 +71,9 @@ jobs:
 
       - name: install pips
         run: poetry install
+
+      - name: disable ipv6
+        run: sudo modprobe ip6table_filter
 
       - name: run molecule tests.
         run: poetry run molecule test
