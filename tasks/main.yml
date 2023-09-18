@@ -154,6 +154,6 @@
           when: not replicaset_primary
 
         - name: set slave ok for replica set
-          ansible.builtin.command: mongo --eval "rs.secondaryOk()"
+          ansible.builtin.command: mongosh --eval "rs.secondaryOk()"
           changed_when: false
           run_once: yes
