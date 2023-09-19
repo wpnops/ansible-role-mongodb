@@ -1,9 +1,9 @@
 # wpnops.mongodb
 
-[![Build Status](https://github.com/wpnops/ansible-role-mongodb/workflows/CI/badge.svg)](https://github.com/wpnops/ansible-role-mongodb/actions)
-[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-wpnops.mongodb.vim-blue.svg)](https://galaxy.ansible.com/wpnops/mongodb/)
+[![Build Status](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/main.yml/badge.svg)](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/main.yml)
+[![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-wpnops.mongodb-blue.svg)](https://galaxy.ansible.com/wpninfra/mongodb/)
 
-An [ansible role](https://galaxy.ansible.com/wpnops/mongodb) to install and configure mongodb
+An [ansible role](https://galaxy.ansible.com/wpninfra/mongodb) to install and configure mongodb
 
 ## Role Variables
 
@@ -15,9 +15,11 @@ By default this role does not depend on any external roles. If any such dependen
 
 ## Example Playbook
 
+```
 - hosts: servers
   roles:
      - role: wpnops.mongodb
+```
 
 ## Testing
 
@@ -26,10 +28,9 @@ Please make sure your environment has [docker](https://www.docker.com) installed
 Role is tested against the following distributions (docker images):
 
   * Ubuntu Focal
-  * Ubuntu Bionic
-  * Ubuntu Xenial
-  * CentOS 7
-  * Debian Buster
+  * Ubuntu Jammy
+  * CentOS 8
+  * Debian Bullseye
 
 You can test the role directly from sources using command ` molecule test `
 
