@@ -59,7 +59,7 @@
 
             - name: install mongodb yum key
               ansible.builtin.yum_repository:
-                name: MongoDB Repository
+                name: mongodb
                 description: MongoDB Repository
                 baseurl: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_release }}/{{ ansible_architecture }}/"
                 enabled: yes
