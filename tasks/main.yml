@@ -75,6 +75,7 @@
                 enabled: yes
                 gpgcheck: yes
                 gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_release }}.asc"
+              changed_when: false
 
             - name: update yum cache
               ansible.builtin.yum:
@@ -128,7 +129,7 @@
           ansible.builtin.service_facts:
 
         - name: manage firewall
-          when: "'ufw' in services"
+          when: "('ufw' in services) or ('ufw.service' in services)"
           block:
 
             - name: configure ssh firewall access
@@ -158,6 +159,12 @@
                 _network: "{{ ansible_default_ipv4.network }}"
                 _prefix: "{{ ansible_default_ipv4.prefix }}"
                 _address_block: "{{ _network }}/{{ _prefix }}"
+
+            - name: manage ufw service
+              ansible.builtin.service:
+                name: "ufw.service"
+                state: started
+                enabled: yes
 
         - name: manage mongodb service
           ansible.builtin.service:
