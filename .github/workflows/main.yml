@@ -57,6 +57,8 @@ jobs:
             command: /lib/systemd/systemd
           - name: ubuntu2204
             command: /lib/systemd/systemd
+          - name: debian11
+            command: /lib/systemd/systemd
           - name: centos8
             command: /usr/lib/systemd/systemd
     steps:

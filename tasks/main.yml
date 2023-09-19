@@ -102,7 +102,8 @@
               vars:
                 _mongodb_package_repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt"
                 _mongodb_ubuntu_repo: "{{ _mongodb_package_repo }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }}"
-                _mongodb_repo: "{{ _mongodb_ubuntu_repo }}/mongodb-org/{{ mongodb_release }} multiverse"
+                _mongodb_debian_repo: "{{ 'main' if ansible_distribution | lower == 'debian' else 'multiverse' }}"
+                _mongodb_repo: "{{ _mongodb_ubuntu_repo }}/mongodb-org/{{ mongodb_release }} {{ _mongodb_debian_repo }}"
               changed_when: false
 
             - name: update apt repos
