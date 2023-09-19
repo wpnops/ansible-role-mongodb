@@ -167,15 +167,27 @@
                 state: started
                 enabled: yes
 
+    - name: manage mongodb services
+      tags: always
+      block:
+
         - name: manage mongodb service
           ansible.builtin.service:
             name: "{{ mongodb_service }}"
             state: started
             enabled: yes
 
-    - name: flush handlers
-      ansible.builtin.meta: flush_handlers
-      tags: always
+        - name: flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: wait for mongodb to be up
+          community.mongodb.mongodb_shell:
+            eval: "db.runCommand({ping: 1})"
+          changed_when: false
+          register: mongodb_status
+          retries: 6
+          delay: 10
+          until: mongodb_status is success
 
     - name: manage mongodb replicaset
       tags:
@@ -220,6 +232,7 @@
           when: not replicaset_primary
 
         - name: set slave ok for replica set
-          ansible.builtin.command: mongosh --eval "rs.secondaryOk()"
+          community.mongodb.mongodb_shell:
+            eval: "rs.secondaryOk()"
           changed_when: false
           run_once: yes
