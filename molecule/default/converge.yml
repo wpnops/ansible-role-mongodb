@@ -6,4 +6,12 @@
   roles:
 
     - nephelaiio.plugins
-    - wpnops.mongodb
+
+  tasks:
+
+    - name: deploy mongodb
+      ansible.builtin.include_role:
+        name: wpnops.mongodb
+      vars:
+        mongodb_members: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | list }}"
+        mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"

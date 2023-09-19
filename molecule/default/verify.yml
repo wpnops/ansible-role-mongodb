@@ -1,10 +1,66 @@
 ---
-- name: verify
+- name: verify mongodb
 
   hosts: all
 
-  gather_facts: true
-
   become: true
 
+  roles:
+
+    - nephelaiio.plugins
+
+  vars:
+
+    mongodb_test:
+      name: "Test"
+
   tasks:
+
+    - name: retrieve mongodb replicaset status
+      community.mongodb.mongodb_status:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        validate: minimal
+        poll: 5
+        interval: 10
+      register: mongodb_rs
+      run_once: yes
+
+    - name: determine mongodb replicaset primary
+      ansible.builtin.set_fact:
+        replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_default_ipv4.address }}"
+      vars:
+        _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
+        _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
+        _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('split_with', ':') | map('first') }}"
+        _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
+
+    - name: evaluate mongodb shell commands
+      when: replicaset_primary
+      block:
+
+        - name: create mongodb test database
+          community.mongodb.mongodb_shell:
+            login_database: "testdb"
+            eval: "db.test.insert({{ mongodb_test }})"
+          register: mongodb_shell_output
+
+        - name: list mongodb databases
+          community.mongodb.mongodb_shell:
+            eval: "db.adminCommand('listDatabases')"
+            stringify: yes
+          changed_when: false
+          register: mongodb_shell_output
+
+        - name: find mongodb test database metadata
+          community.mongodb.mongodb_shell:
+            login_database: "testdb"
+            eval: "db.test.find({{ mongodb_test }}).toArray()"
+          failed_when: mongodb_shell_output.transformed_output | length == 0
+          changed_when: false
+          register: mongodb_shell_output
+
+        - name: drop mongodb test database
+          community.mongodb.mongodb_shell:
+            login_database: "testdb"
+            eval: "db.dropDatabase()"
+          changed_when: false

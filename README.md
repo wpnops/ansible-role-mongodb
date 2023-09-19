@@ -18,7 +18,6 @@ By default this role does not depend on any external roles. If any such dependen
 - hosts: servers
   roles:
      - role: wpnops.mongodb
-       mongodb_package_state: latest
 
 ## Testing
 

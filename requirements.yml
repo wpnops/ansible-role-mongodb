@@ -1,4 +1,7 @@
 ---
 roles:
   - nephelaiio.plugins
-collections: []
+collections:
+  - community.general
+  - community.mongodb
+  - ansible.utils
