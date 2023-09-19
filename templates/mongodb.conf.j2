@@ -2,11 +2,11 @@ net:
   port: {{ mongodb_port }}
   bindIp: {{ mongodb_bindip }}
 systemLog:
-  path: {{ mongodb_log_path }}
+  path: {{ _mongodb_log_path }}
   logAppend: true
   destination: file
 storage:
-  dbPath: {{ mongodb_storage_dbpath }}
+  dbPath: {{ _mongodb_storage_dbpath }}
   journal:
     commitIntervalMs: 100
 replication:
