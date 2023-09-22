@@ -35,3 +35,4 @@ mongodb_storage_dbpath_default:
 mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_members: []
+mongodb_src_addresses_list: []
