@@ -130,6 +130,7 @@
             - name: update apt repos
               ansible.builtin.apt:
                 update_cache: true
+              changed_when: false
               register: apt_res
               retries: 5
               delay: 5
