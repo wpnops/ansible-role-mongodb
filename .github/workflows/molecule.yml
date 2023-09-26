@@ -1,5 +1,5 @@
 ---
-name: Molecule
+name: molecule
 
 on:
 
@@ -33,18 +33,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: install poetry
-        run: pip3 install poetry
-
-      - name: install pips
-        run: poetry install
+      - name: install make
+        run: sudo apt-get install -y make
 
       - name: lint code
-        run: |
-          set -e
-          poetry run yamllint .
-          poetry run ansible-lint .
-          poetry run molecule syntax
+        run: make lint
 
   molecule:
 
@@ -73,17 +66,11 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: install poetry
-        run: pip3 install poetry
+      - name: install make
+        run: sudo apt-get install -y make
 
-      - name: install pips
-        run: poetry install
-
-      - name: disable ipv6
-        run: sudo modprobe ip6table_filter
-
-      - name: run molecule tests.
-        run: poetry run molecule test
+      - name: run molecule tests
+        run: make test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'

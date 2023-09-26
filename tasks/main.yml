@@ -30,6 +30,15 @@
       ansible.builtin.meta: end_play
       when: not mongodb_release
 
+    - name: stat mongodb configuration
+      ansible.builtin.stat:
+        path: "{{ mongodb_config_path }}"
+      register: mongodb_config_stat
+
+    - name: debug var
+      debug:
+        var: mongodb_config_stat
+
     - name: install mongodb pip packages
       ansible.builtin.pip:
         name: "{{ mongodb_pip_packages }}"
@@ -43,7 +52,7 @@
         name:
           - gpg-agent
           - gnupg
-        update_cache: yes
+        update_cache: true
       when: ansible_os_family | lower == "debian"
       register: apt_res
       retries: 5
@@ -54,7 +63,7 @@
       ansible.builtin.yum:
         name:
           - gnupg2
-        update_cache: yes
+        update_cache: true
       when: ansible_os_family | lower == "redhat"
       register: yum_res
       retries: 5
@@ -83,15 +92,17 @@
               ansible.builtin.yum_repository:
                 name: mongodb
                 description: MongoDB Repository
-                baseurl: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_release }}/{{ ansible_architecture }}/"
-                enabled: yes
-                gpgcheck: yes
+                baseurl: "{{ _mongodb_baseurl }}/{{ mongodb_release }}/{{ ansible_architecture }}/"
+                enabled: true
+                gpgcheck: true
                 gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_release }}.asc"
+              vars:
+                _mongodb_baseurl: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org"
               changed_when: false
 
             - name: update yum cache
               ansible.builtin.yum:
-                update_cache: yes
+                update_cache: true
               register: yum_res
               retries: 5
               delay: 5
@@ -114,17 +125,20 @@
             - name: add apt repository
               ansible.builtin.apt_repository:
                 filename: mongodb
-                repo: "{{ _mongodb_repo }}"
+                repo: "{{ _repo }}"
               vars:
-                _mongodb_package_repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt"
-                _mongodb_ubuntu_repo: "{{ _mongodb_package_repo }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }}"
-                _mongodb_debian_repo: "{{ 'main' if ansible_distribution | lower == 'debian' else 'multiverse' }}"
-                _mongodb_repo: "{{ _mongodb_ubuntu_repo }}/mongodb-org/{{ mongodb_release }} {{ _mongodb_debian_repo }}"
+                _is_debian: "{{ (ansible_distribution | lower) == 'debian' }}"
+                _distribution: "{{ ansible_distribution | lower }}"
+                _os_release: "{{ ansible_distribution_release }}"
+                _repo_mongodb: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt"
+                _repo_ubuntu_url: "{{ _repo_mongodb }}/{{ _distribution }} {{ _os_release }}"
+                _repo_ubuntu_name: "{{ 'main' if _is_debian else 'multiverse' }}"
+                _repo: "{{ _repo_ubuntu_url }}/mongodb-org/{{ mongodb_release }} {{ _repo_ubuntu_name }}"
               changed_when: false
 
             - name: update apt repos
               ansible.builtin.apt:
-                update_cache: yes
+                update_cache: true
               register: apt_res
               retries: 5
               delay: 5
@@ -154,47 +168,67 @@
           ansible.builtin.service_facts:
 
         - name: manage firewall
-          when: "('ufw' in services) or ('ufw.service' in services)"
+          when: ('ufw' in services) or ('ufw.service' in services)
           block:
 
-            - name: configure ssh firewall access
-              community.general.ufw:
-                state: enabled
-                from: any
-                port: '22'
-                proto: tcp
-                rule: allow
+            - name: configure ufw access rules
+              when: mongodb_firewall_state != "stopped"
+              block:
 
-            - name: configure snmp firewall access
-              community.general.ufw:
-                state: enabled
-                from: any
-                port: '161'
-                proto: any
-                rule: allow
+                - name: configure ssh firewall access
+                  community.general.ufw:
+                    state: enabled
+                    from: any
+                    port: '22'
+                    proto: tcp
+                    rule: allow
 
-            - name: compute mongodb address block
-              ansible.builtin.set_fact:
-                _mongodb_addresses_list: "{{ mongodb_src_addresses_list + [_default_address] | list | unique }}"
-              vars:
-                _network: "{{ ansible_default_ipv4.network }}"
-                _prefix: "{{ ansible_default_ipv4.prefix }}"
-                _default_address: "{{ _network }}/{{ _prefix }}"
+                - name: configure snmp firewall access
+                  community.general.ufw:
+                    state: enabled
+                    from: any
+                    port: '161'
+                    proto: any
+                    rule: allow
 
-            - name: configure mongodb firewall access
-              community.general.ufw:
-                state: enabled
-                from: "{{ item }}"
-                port: "27017:27020"
-                proto: tcp
-                rule: allow
-              loop: "{{ _mongodb_addresses_list }}"
+                - name: compute mongodb address block
+                  ansible.builtin.set_fact:
+                    _mongodb_addresses_list: "{{ _addr_list + [_default_address] | list | unique }}"
+                  vars:
+                    _addr_list: "{{ mongodb_src_addresses_list }}"
+                    _network: "{{ ansible_default_ipv4.network }}"
+                    _prefix: "{{ ansible_default_ipv4.prefix }}"
+                    _default_address: "{{ _network }}/{{ _prefix }}"
 
-            - name: manage ufw service
-              ansible.builtin.service:
-                name: "ufw.service"
-                state: started
-                enabled: yes
+                - name: configure mongodb firewall access
+                  community.general.ufw:
+                    state: enabled
+                    from: "{{ item }}"
+                    port: "27017:27020"
+                    proto: tcp
+                    rule: allow
+                  loop: "{{ _mongodb_addresses_list }}"
+
+                - name: manage ufw service
+                  ansible.builtin.service:
+                    name: "ufw.service"
+                    state: "{{ mongodb_firewall_state }}"
+                    enabled: true
+
+            - name: disable ufw service
+              when: mongodb_firewall_state == "stopped"
+              block:
+
+                - name: Disable ufw rules
+                  ansible.builtin.command: ufw disable
+                  tags:
+                    - skip_ansible_lint
+
+                - name: Stop ufw service
+                  ansible.builtin.service:
+                    name: "ufw.service"
+                    state: stopped
+                    enabled: false
 
     - name: manage mongodb services
       tags: always
@@ -204,7 +238,7 @@
           ansible.builtin.service:
             name: "{{ mongodb_service }}"
             state: started
-            enabled: yes
+            enabled: true
 
         - name: flush handlers
           ansible.builtin.meta: flush_handlers
@@ -231,8 +265,8 @@
           community.mongodb.mongodb_replicaset:
             replica_set: "{{ mongodb_replicaset_name }}"
             members: "{{ mongodb_replicaset_members }}"
-            validate: no
-          run_once: yes
+            validate: false
+          run_once: true
 
         - name: retrieve mongodb replicaset status
           community.mongodb.mongodb_status:
@@ -241,27 +275,28 @@
             poll: 5
             interval: 10
           register: mongodb_rs
-          run_once: yes
+          run_once: true
 
         - name: determine mongodb replicaset primary
           ansible.builtin.set_fact:
             replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_host }}"
           vars:
             _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
-            _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
-            _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('split_with', ':') | map('first') }}"
+            _replicaset_primary_filter: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
+            _replicaset_primary_keys: "{{ _replicaset_primary_filter | map(attribute='key') }}"
+            _replicaset_primary_list: "{{ _replicaset_primary_keys | map('split_with', ':') | map('first') }}"
             _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
         - name: reconfigure mongodb replica set
           community.mongodb.mongodb_replicaset:
             replica_set: "{{ mongodb_replicaset_name }}"
             members: "{{ mongodb_replicaset_members }}"
-            reconfigure: yes
-            validate: no
+            reconfigure: true
+            validate: false
           when: not replicaset_primary
 
         - name: set slave ok for replica set
           community.mongodb.mongodb_shell:
             eval: "rs.secondaryOk()"
           changed_when: false
-          run_once: yes
+          run_once: true

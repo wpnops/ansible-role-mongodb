@@ -1,6 +1,6 @@
 # wpnops.mongodb
 
-[![Build Status](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/main.yml/badge.svg)](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/main.yml)
+[![Build Status](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/molecule.yml/badge.svg)](https://github.com/wpnops/ansible-role-mongodb/actions/workflows/molecule.yml)
 [![Ansible Galaxy](http://img.shields.io/badge/ansible--galaxy-wpnops.mongodb-blue.svg)](https://galaxy.ansible.com/wpninfra/mongodb/)
 
 An [ansible role](https://galaxy.ansible.com/wpninfra/mongodb) to install and configure mongodb
