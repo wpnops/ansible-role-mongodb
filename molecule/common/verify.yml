@@ -23,7 +23,7 @@
         poll: 5
         interval: 10
       register: mongodb_rs
-      run_once: yes
+      run_once: true
 
     - name: determine mongodb replicaset primary
       ansible.builtin.set_fact:
@@ -47,7 +47,7 @@
         - name: list mongodb databases
           community.mongodb.mongodb_shell:
             eval: "db.adminCommand('listDatabases')"
-            stringify: yes
+            stringify: true
           changed_when: false
           register: mongodb_shell_output
 

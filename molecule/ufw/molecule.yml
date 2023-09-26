@@ -56,6 +56,6 @@ provisioner:
       all:
         vars:
           mongodb_replicaset_name: test
-          mongodb_firewall_state: started
+          mongodb_firewall_state: stopped
 verifier:
   name: ansible
