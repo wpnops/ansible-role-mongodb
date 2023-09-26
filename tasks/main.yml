@@ -221,7 +221,10 @@
 
                 - name: query ufw status
                   ansible.builtin.command: ufw status
+                  changed_when: false
                   register: _ufw_status
+                  tags:
+                    - skip_ansible_lint
 
                 - name: disable ufw
                   ansible.builtin.command: ufw disable
