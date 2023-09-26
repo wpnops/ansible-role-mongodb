@@ -30,15 +30,6 @@
       ansible.builtin.meta: end_play
       when: not mongodb_release
 
-    - name: stat mongodb configuration
-      ansible.builtin.stat:
-        path: "{{ mongodb_config_path }}"
-      register: mongodb_config_stat
-
-    - name: debug var
-      debug:
-        var: mongodb_config_stat
-
     - name: install mongodb pip packages
       ansible.builtin.pip:
         name: "{{ mongodb_pip_packages }}"
