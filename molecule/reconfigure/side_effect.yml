@@ -1,0 +1,35 @@
+---
+- name: side-effect
+
+  hosts: all
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: attempt replicaset rename operation
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_replicaset_name: edited
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: succeed on rename failure
+          ansible.builtin.debug:
+            msg: "Replicaset rename operation failed as expected"
+
+        - name: end play
+          ansible.builtin.meta: end_play
+
+    - name: fail on rename success
+      ansible.builtin.fail:
+        msg: "Replicaset rename operation must fail"
