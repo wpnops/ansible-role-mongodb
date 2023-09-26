@@ -219,12 +219,15 @@
               when: mongodb_firewall_state == "stopped"
               block:
 
-                - name: Disable ufw rules
-                  ansible.builtin.command: ufw disable
-                  tags:
-                    - skip_ansible_lint
+                - name: query ufw status
+                  ansible.builtin.command: ufw status
+                  register: _ufw_status
 
-                - name: Stop ufw service
+                - name: disable ufw
+                  ansible.builtin.command: ufw disable
+                  when: _ufw_status.stdout is not match("Status[:] inactive")
+
+                - name: stop ufw service
                   ansible.builtin.service:
                     name: "ufw.service"
                     state: stopped
