@@ -36,4 +36,5 @@ mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_members: []
 mongodb_src_addresses_list: []
+mongodb_sharding_role: ''
 mongodb_firewall_state: started

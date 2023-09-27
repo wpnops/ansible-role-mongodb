@@ -19,16 +19,33 @@
           - "default"
 
     - name: verify mongodb packages
-      ansible.builtin.meta: end_play
+      ansible.builtin.fail:
+        msg: _mongodb_packages must be set and not empty
       when: _mongodb_packages | default([]) | length == 0
 
     - name: verify mongodb pip packages
-      ansible.builtin.meta: end_play
+      ansible.builtin.fail:
+        msg: mongodb_pip_packages must be set and not empty
       when: mongodb_pip_packages | default([]) | length == 0
 
     - name: verify mongodb release
-      ansible.builtin.meta: end_play
+      ansible.builtin.fail:
+        msg: mongodb_release must be set
       when: not mongodb_release
+
+    - name: verify mongodb sharding role
+      ansible.builtin.fail:
+        msg: "mongodb_sharding_roles must be one of [{{ _roles.join(', ') }}], got '{{ _role }}''"
+      vars:
+        _role: "{{ mongodb_sharding_role }}"
+        _roles: ['configsvr', 'shardsvr']
+      when:
+        - _role != ''
+        - _role not in _roles
+
+- name: deploy mongodb
+  tags: install
+  block:
 
     - name: install mongodb pip packages
       ansible.builtin.pip:
@@ -60,10 +77,6 @@
       retries: 5
       delay: 5
       until: yum_res is success
-
-- name: manage mongodb
-  tags: install
-  block:
 
     - name: install mongodb packages
       when: "'mongodb-org' in _mongodb_packages"
