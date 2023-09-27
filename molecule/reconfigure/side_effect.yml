@@ -35,3 +35,41 @@
       ansible.builtin.fail:
         msg: "Replicaset rename operation must fail"
       when: not _rename_failed
+
+
+- name: change sharding role
+
+  hosts: all
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: set base facts
+      ansible.builtin.set_fact:
+        _sharding_failed: false
+
+    - name: attempt sharding role change
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_sharding_role: configsvr
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: set result facts
+          ansible.builtin.set_fact:
+            _sharding_failed: true
+
+    - name: fail on sharding reconfiguration success
+      ansible.builtin.fail:
+        msg: "Shard reconfiguraion operation must fail"
+      when: not _sharding_failed

@@ -35,13 +35,42 @@
 
     - name: verify mongodb sharding role
       ansible.builtin.fail:
-        msg: "mongodb_sharding_roles must be one of [{{ _roles.join(', ') }}], got '{{ _role }}''"
+        msg: "mongodb_sharding_roles must be one of [{{ _roles | join(', ') }}], got '{{ _role }}''"
       vars:
         _role: "{{ mongodb_sharding_role }}"
         _roles: ['configsvr', 'shardsvr']
       when:
         - _role != ''
         - _role not in _roles
+
+    - name: stat mongodb configuration file
+      ansible.builtin.stat:
+        path: "{{ mongodb_config_path }}"
+      register: _mongodb_config_file
+
+    - name: verify mongodb configuration
+      when: _mongodb_config_file.stat.exists
+      block:
+
+        - name: slurp mongodb configuration
+          ansible.builtin.slurp:
+            path: "{{ mongodb_config_path }}"
+          register: _mongodb_config_data
+
+        - name: decode mongodb configuration
+          ansible.builtin.set_fact:
+            _mongodb_config: "{{ _mongodb_config_data['content'] | b64decode | from_yaml }}"
+
+        - name: verify sharding configuration
+          ansible.builtin.fail:
+            msg: "unsupported sharding cluster role change to '{{ mongodb_sharding_role }}'"
+          vars:
+            _sharding: "sharding"
+            _role: "clusterRole"
+          when:
+            - _sharding in _mongodb_config
+            - _role in _mongodb_config[_sharding]
+            - _mongodb_config[_sharding][_role] != mongodb_sharding_role
 
 - name: deploy mongodb
   tags: install

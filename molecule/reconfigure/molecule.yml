@@ -56,5 +56,6 @@ provisioner:
         vars:
           mongodb_replicaset_name: test
           mongodb_firewall_state: stopped
+          mongodb_sharding_role: shardsvr
 verifier:
   name: ansible

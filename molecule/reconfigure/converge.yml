@@ -31,11 +31,11 @@
           ansible.builtin.set_fact:
             _sharding_failed: true
 
-    - name: fail on rename success
+    - name: fail on broken replicaset configuration
       ansible.builtin.fail:
-        msg: "sharding role configuration operation must fail"
-      when: not _rename_failed
+        msg: "broken sharding role configuration operation must fail"
+      when: not _sharding_failed
 
 
 - name: include commong converge play
-  include_play: ../common/converge.yml
+  import_playbook: ../common/converge.yml
