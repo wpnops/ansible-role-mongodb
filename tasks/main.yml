@@ -301,6 +301,14 @@
         - mongodb_replicaset_members | default([]) | length > 2
       block:
 
+        - name: verify mongodb replicaset member count
+          ansible.builtin.fail:
+            msg: "mongodb_release must be set to one of [{{ _memeber_counts | join(', ') }}] }}]"
+          vars:
+            _member_count: "{{ mongodb_replicaset_members | length }}"
+            _member_counts: [3, 5, 7]
+          when: _members_count not in _member_counts
+
         - name: create mongodb replica set
           community.mongodb.mongodb_replicaset:
             replica_set: "{{ mongodb_replicaset_name }}"

@@ -1,0 +1,163 @@
+---
+- name: configure 1 replicaset node
+
+  hosts: all
+
+  vars:
+
+    mongodb_replicaset_members_num: 1
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: attempt broken replicaset sharding configuration
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_mmebers_num] }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: configure 2 replicaset node
+
+  hosts: all
+
+  vars:
+
+    mongodb_replicaset_members_num: 2
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: attempt broken replicaset sharding configuration
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: configure 4 replicaset node
+
+  hosts: all
+
+  vars:
+
+    mongodb_replicaset_members_num: 4
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: attempt broken replicaset sharding configuration
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: configure 6 replicaset node
+
+  hosts: all
+
+  vars:
+
+    mongodb_replicaset_members_num: 6
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: attempt broken replicaset sharding configuration
+      block:
+
+        - name: deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed

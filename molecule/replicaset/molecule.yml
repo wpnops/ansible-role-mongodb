@@ -1,0 +1,94 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: requirements.yml
+    requirements-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: mongodb1
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb2
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb3
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb4
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb5
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+  - name: mongodb6
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    privileged: true
+    pre_build_image: true
+    tmpfs:
+      - /tmp
+      - /opt
+provisioner:
+  name: ansible
+  playbooks:
+    prepare: ../common/prepare.yml
+    create: ../common/create.yml
+    verify: ../common/verify.yml
+    destroy: ../common/destroy.yml
+  config_options:
+    defaults:
+      callbacks_enabled: ansible.posix.profile_tasks
+  inventory:
+    hosts:
+      all:
+        vars:
+          mongodb_replicaset_name: test
+          mongodb_firewall_state: stopped
+          mongodb_sharding_role: shardsvr
+verifier:
+  name: ansible
