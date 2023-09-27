@@ -306,7 +306,7 @@
           vars:
             _member_count: "{{ mongodb_replicaset_members | length }}"
             _member_counts: [3, 5, 7]
-          when: _members_count not in _member_counts
+          when: _member_count not in _member_counts
 
         - name: Create MongoDB replica set
           community.mongodb.mongodb_replicaset:
