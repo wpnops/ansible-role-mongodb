@@ -1,9 +1,9 @@
 ---
-- name: verify mongodb prerequesites
+- name: Verify MongoDB prerequesites
   tags: always
   block:
 
-    - name: set variable overrides
+    - name: Set variable overrides
       ansible.builtin.set_fact:
         _mongodb_packages: "{{ mongodb_packages | default(mongodb_packages_default | sorted_get(overrides)) }}"
         _mongodb_user: "{{ mongodb_user | default(mongodb_user_default | sorted_get(overrides)) }}"
@@ -18,22 +18,22 @@
           - "{{ ansible_os_family | lower }}"
           - "default"
 
-    - name: verify mongodb packages
+    - name: Verify MongoDB packages
       ansible.builtin.fail:
         msg: _mongodb_packages must be set and not empty
       when: _mongodb_packages | default([]) | length == 0
 
-    - name: verify mongodb pip packages
+    - name: Verify MongoDB pip packages
       ansible.builtin.fail:
         msg: mongodb_pip_packages must be set and not empty
       when: mongodb_pip_packages | default([]) | length == 0
 
-    - name: verify mongodb release
+    - name: Verify MongoDB release
       ansible.builtin.fail:
         msg: mongodb_release must be set
       when: not mongodb_release
 
-    - name: verify mongodb sharding role
+    - name: Verify MongoDB sharding role
       ansible.builtin.fail:
         msg: "mongodb_sharding_roles must be one of [{{ _roles | join(', ') }}], got '{{ _role }}''"
       vars:
@@ -43,25 +43,25 @@
         - _role != ''
         - _role not in _roles
 
-    - name: stat mongodb configuration file
+    - name: Stat MongoDB configuration file
       ansible.builtin.stat:
         path: "{{ mongodb_config_path }}"
       register: _mongodb_config_file
 
-    - name: verify mongodb configuration
+    - name: Verify MongoDB configuration
       when: _mongodb_config_file.stat.exists
       block:
 
-        - name: slurp mongodb configuration
+        - name: Slurp MongoDB configuration
           ansible.builtin.slurp:
             path: "{{ mongodb_config_path }}"
           register: _mongodb_config_data
 
-        - name: decode mongodb configuration
+        - name: Decode MongoDB configuration
           ansible.builtin.set_fact:
             _mongodb_config: "{{ _mongodb_config_data['content'] | b64decode | from_yaml }}"
 
-        - name: verify sharding configuration
+        - name: Verify sharding configuration
           ansible.builtin.fail:
             msg: "unsupported sharding cluster role change to '{{ mongodb_sharding_role }}'"
           vars:
@@ -72,11 +72,11 @@
             - _role in _mongodb_config[_sharding]
             - _mongodb_config[_sharding][_role] != mongodb_sharding_role
 
-- name: deploy mongodb
+- name: Deploy mongodb
   tags: install
   block:
 
-    - name: install mongodb pip packages
+    - name: Install MongoDB pip packages
       ansible.builtin.pip:
         name: "{{ mongodb_pip_packages }}"
       register: pip_res
@@ -84,7 +84,7 @@
       delay: 5
       until: pip_res is success
 
-    - name: install mongodb pre-requisites for debian
+    - name: Install MongoDB pre-requisites for debian
       ansible.builtin.apt:
         name:
           - gpg-agent
@@ -96,7 +96,7 @@
       delay: 5
       until: apt_res is success
 
-    - name: install mongodb pre-requisites for redhat
+    - name: Install MongoDB pre-requisites for redhat
       ansible.builtin.yum:
         name:
           - gnupg2
@@ -107,21 +107,21 @@
       delay: 5
       until: yum_res is success
 
-    - name: install mongodb packages
+    - name: Install MongoDB packages
       when: "'mongodb-org' in _mongodb_packages"
       block:
 
-        - name: install mongodb in redhat
+        - name: Install MongoDB in redhat
           when: ansible_os_family | lower == "redhat"
           block:
 
-            - name: clean yum repository
+            - name: Clean yum repository
               ansible.builtin.file:
                 state: absent
                 path: /etc/yum.repos.d/mongodb.repo
               changed_when: false
 
-            - name: install mongodb yum key
+            - name: Install MongoDB yum key
               ansible.builtin.yum_repository:
                 name: mongodb
                 description: MongoDB Repository
@@ -133,7 +133,7 @@
                 _mongodb_baseurl: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org"
               changed_when: false
 
-            - name: update yum cache
+            - name: Update yum cache
               ansible.builtin.yum:
                 update_cache: true
               register: yum_res
@@ -141,21 +141,21 @@
               delay: 5
               until: yum_res is success
 
-        - name: install mongodb in debian
+        - name: Install MongoDB in debian
           when: ansible_os_family | lower == "debian"
           block:
 
-            - name: install mongodb apt key
+            - name: Install MongoDB apt key
               ansible.builtin.apt_key:
                 url: "https://pgp.mongodb.com/server-{{ mongodb_release }}.asc"
 
-            - name: clean apt repository
+            - name: Clean apt repository
               ansible.builtin.file:
                 state: absent
                 path: /etc/apt/sources.list.d/mongodb.list
               changed_when: false
 
-            - name: add apt repository
+            - name: Add apt repository
               ansible.builtin.apt_repository:
                 filename: mongodb
                 repo: "{{ _repo }}"
@@ -169,7 +169,7 @@
                 _repo: "{{ _repo_ubuntu_url }}/mongodb-org/{{ mongodb_release }} {{ _repo_ubuntu_name }}"
               changed_when: false
 
-            - name: update apt repos
+            - name: Update apt repos
               ansible.builtin.apt:
                 update_cache: true
               changed_when: false
@@ -178,7 +178,7 @@
               delay: 5
               until: apt_res is success
 
-    - name: install mongodb packages
+    - name: Install MongoDB packages
       ansible.builtin.package:
         name: "{{ _mongodb_packages }}"
       register: package_res
@@ -186,11 +186,11 @@
       delay: 5
       until: package_res is success
 
-    - name: configure mongodb
+    - name: Configure mongodb
       tags: configure
       block:
 
-        - name: configure mongodb
+        - name: Configure mongodb
           ansible.builtin.template:
             src: mongodb.conf.j2
             dest: "{{ mongodb_config_path }}"
@@ -198,18 +198,18 @@
             group: "{{ _mongodb_group }}"
           notify: restart mongodb
 
-        - name: gather service facts
+        - name: Gather service facts
           ansible.builtin.service_facts:
 
-        - name: manage firewall
+        - name: Manage firewall
           when: ('ufw' in services) or ('ufw.service' in services)
           block:
 
-            - name: configure ufw access rules
+            - name: Configure ufw access rules
               when: mongodb_firewall_state != "stopped"
               block:
 
-                - name: configure ssh firewall access
+                - name: Configure ssh firewall access
                   community.general.ufw:
                     state: enabled
                     from: any
@@ -217,7 +217,7 @@
                     proto: tcp
                     rule: allow
 
-                - name: configure snmp firewall access
+                - name: Configure snmp firewall access
                   community.general.ufw:
                     state: enabled
                     from: any
@@ -225,7 +225,7 @@
                     proto: any
                     rule: allow
 
-                - name: compute mongodb address block
+                - name: Compute mongodb address block
                   ansible.builtin.set_fact:
                     _mongodb_addresses_list: "{{ _addr_list + [_default_address] | list | unique }}"
                   vars:
@@ -234,7 +234,7 @@
                     _prefix: "{{ ansible_default_ipv4.prefix }}"
                     _default_address: "{{ _network }}/{{ _prefix }}"
 
-                - name: configure mongodb firewall access
+                - name: Configure mongodb firewall access
                   community.general.ufw:
                     state: enabled
                     from: "{{ item }}"
@@ -243,47 +243,46 @@
                     rule: allow
                   loop: "{{ _mongodb_addresses_list }}"
 
-                - name: manage ufw service
+                - name: Manage ufw service
                   ansible.builtin.service:
                     name: "ufw.service"
                     state: "{{ mongodb_firewall_state }}"
                     enabled: true
 
-            - name: disable ufw service
+            - name: Disable ufw service
               when: mongodb_firewall_state == "stopped"
               block:
 
-                - name: query ufw status
+                - name: Query ufw status
                   ansible.builtin.command: ufw status
                   changed_when: false
                   register: _ufw_status
-                  tags:
-                    - skip_ansible_lint
 
-                - name: disable ufw
+                - name: Disable ufw
                   ansible.builtin.command: ufw disable
                   when: _ufw_status.stdout is not match("Status[:] inactive")
+                  tags: skip_ansible_lint
 
-                - name: stop ufw service
+                - name: Stop ufw service
                   ansible.builtin.service:
                     name: "ufw.service"
                     state: stopped
                     enabled: false
 
-    - name: manage mongodb services
+    - name: Manage MongoDB services
       tags: always
       block:
 
-        - name: manage mongodb service
+        - name: Manage MongoDB service
           ansible.builtin.service:
             name: "{{ mongodb_service }}"
             state: started
             enabled: true
 
-        - name: flush handlers
+        - name: Flush handlers
           ansible.builtin.meta: flush_handlers
 
-        - name: wait for mongodb to be up
+        - name: Wait for MongoDB to be up
           community.mongodb.mongodb_shell:
             eval: "db.runCommand({ping: 1})"
           changed_when: false
@@ -292,7 +291,7 @@
           delay: 10
           until: mongodb_status is success
 
-    - name: manage mongodb replicaset
+    - name: Manage MongoDB replicaset
       tags:
         - configure
         - replicaset
@@ -301,7 +300,7 @@
         - mongodb_replicaset_members | default([]) | length > 2
       block:
 
-        - name: verify mongodb replicaset member count
+        - name: Verify MongoDB replicaset member count
           ansible.builtin.fail:
             msg: "mongodb_release must be set to one of [{{ _memeber_counts | join(', ') }}] }}]"
           vars:
@@ -309,14 +308,14 @@
             _member_counts: [3, 5, 7]
           when: _members_count not in _member_counts
 
-        - name: create mongodb replica set
+        - name: Create MongoDB replica set
           community.mongodb.mongodb_replicaset:
             replica_set: "{{ mongodb_replicaset_name }}"
             members: "{{ mongodb_replicaset_members }}"
             validate: false
           run_once: true
 
-        - name: retrieve mongodb replicaset status
+        - name: Retrieve mongodb replicaset status
           community.mongodb.mongodb_status:
             replica_set: "{{ mongodb_replicaset_name }}"
             validate: minimal
@@ -325,7 +324,7 @@
           register: mongodb_rs
           run_once: true
 
-        - name: determine mongodb replicaset primary
+        - name: Determine MongoDB replicaset primary
           ansible.builtin.set_fact:
             replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_host }}"
           vars:
@@ -335,7 +334,7 @@
             _replicaset_primary_list: "{{ _replicaset_primary_keys | map('split_with', ':') | map('first') }}"
             _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
-        - name: reconfigure mongodb replica set
+        - name: Reconfigure MongoDB replica set
           community.mongodb.mongodb_replicaset:
             replica_set: "{{ mongodb_replicaset_name }}"
             members: "{{ mongodb_replicaset_members }}"
@@ -343,7 +342,7 @@
             validate: false
           when: not replicaset_primary
 
-        - name: set slave ok for replica set
+        - name: Set slave ok for replica set
           community.mongodb.mongodb_shell:
             eval: "rs.secondaryOk()"
           changed_when: false

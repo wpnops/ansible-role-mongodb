@@ -1,5 +1,5 @@
 ---
-- name: verify mongodb
+- name: Verify mongodb
 
   hosts: all
 
@@ -16,7 +16,7 @@
 
   tasks:
 
-    - name: retrieve mongodb replicaset status
+    - name: Retrieve MongoDB replicaset status
       community.mongodb.mongodb_status:
         replica_set: "{{ mongodb_replicaset_name }}"
         validate: minimal
@@ -25,7 +25,7 @@
       register: mongodb_rs
       run_once: true
 
-    - name: determine mongodb replicaset primary
+    - name: Determine MongoDB replicaset primary
       ansible.builtin.set_fact:
         replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_default_ipv4.address }}"
       vars:
@@ -34,24 +34,24 @@
         _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('split_with', ':') | map('first') }}"
         _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
-    - name: evaluate mongodb shell commands
+    - name: Evaluate MongoDB shell commands
       when: replicaset_primary
       block:
 
-        - name: create mongodb test database
+        - name: Create MongoDB test database
           community.mongodb.mongodb_shell:
             login_database: "testdb"
             eval: "db.test.insert({{ mongodb_test }})"
           register: mongodb_shell_output
 
-        - name: list mongodb databases
+        - name: List MongoDB databases
           community.mongodb.mongodb_shell:
             eval: "db.adminCommand('listDatabases')"
             stringify: true
           changed_when: false
           register: mongodb_shell_output
 
-        - name: find mongodb test database metadata
+        - name: Find MongoDB test database metadata
           community.mongodb.mongodb_shell:
             login_database: "testdb"
             eval: "db.test.find({{ mongodb_test }}).toArray()"
@@ -59,7 +59,7 @@
           changed_when: false
           register: mongodb_shell_output
 
-        - name: drop mongodb test database
+        - name: Drop MongoDB test database
           community.mongodb.mongodb_shell:
             login_database: "testdb"
             eval: "db.dropDatabase()"

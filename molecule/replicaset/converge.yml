@@ -1,5 +1,5 @@
 ---
-- name: configure 1 replicaset node
+- name: Configure 1 replicaset node
 
   hosts: all
 
@@ -13,14 +13,14 @@
 
   tasks:
 
-    - name: set base facts
+    - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
 
-    - name: attempt broken replicaset sharding configuration
+    - name: Attempt broken replicaset sharding configuration
       block:
 
-        - name: deploy mongodb
+        - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -30,17 +30,17 @@
 
       rescue:
 
-        - name: set result facts
+        - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
 
-    - name: fail on broken replicaset member configuration
+    - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
         msg: "broken replicaset member configuration operation must fail"
       when: not _members_failed
 
 
-- name: configure 2 replicaset node
+- name: Configure 2 replicaset node
 
   hosts: all
 
@@ -54,14 +54,14 @@
 
   tasks:
 
-    - name: set base facts
+    - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
 
-    - name: attempt broken replicaset sharding configuration
+    - name: Attempt broken replicaset sharding configuration
       block:
 
-        - name: deploy mongodb
+        - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -71,17 +71,17 @@
 
       rescue:
 
-        - name: set result facts
+        - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
 
-    - name: fail on broken replicaset member configuration
+    - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
         msg: "broken replicaset member configuration operation must fail"
       when: not _members_failed
 
 
-- name: configure 4 replicaset node
+- name: Configure 4 replicaset node
 
   hosts: all
 
@@ -95,14 +95,14 @@
 
   tasks:
 
-    - name: set base facts
+    - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
 
-    - name: attempt broken replicaset sharding configuration
+    - name: Attempt broken replicaset sharding configuration
       block:
 
-        - name: deploy mongodb
+        - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -112,17 +112,17 @@
 
       rescue:
 
-        - name: set result facts
+        - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
 
-    - name: fail on broken replicaset member configuration
+    - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
         msg: "broken replicaset member configuration operation must fail"
       when: not _members_failed
 
 
-- name: configure 6 replicaset node
+- name: Configure 6 replicaset node
 
   hosts: all
 
@@ -136,14 +136,14 @@
 
   tasks:
 
-    - name: set base facts
+    - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
 
-    - name: attempt broken replicaset sharding configuration
+    - name: Attempt broken replicaset sharding configuration
       block:
 
-        - name: deploy mongodb
+        - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -153,11 +153,11 @@
 
       rescue:
 
-        - name: set result facts
+        - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
 
-    - name: fail on broken replicaset member configuration
+    - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
         msg: "broken replicaset member configuration operation must fail"
       when: not _members_failed
