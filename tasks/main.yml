@@ -302,7 +302,7 @@
 
         - name: Verify MongoDB replicaset member count
           ansible.builtin.fail:
-            msg: "mongodb_release must be set to one of [{{ _memeber_counts | join(', ') }}] }}]"
+            msg: "mongodb_release must be set to one of [{{ _member_counts | join(', ') }}] }}]"
           vars:
             _member_count: "{{ mongodb_replicaset_members | length }}"
             _member_counts: [3, 5, 7]
