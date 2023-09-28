@@ -196,7 +196,7 @@
             dest: "{{ mongodb_config_path }}"
             owner: "{{ _mongodb_user }}"
             group: "{{ _mongodb_group }}"
-          notify: Restart mongodb
+          notify: Restart MongoDB
           register: config_manage
 
         - name: Gather service facts
