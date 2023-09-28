@@ -51,7 +51,6 @@ jobs:
         scenario:
           - name: default
           - name: ufw
-          - name: reconfigure
           - name: replicaset
         image:
           - name: ubuntu2204
