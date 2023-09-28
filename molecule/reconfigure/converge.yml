@@ -1,5 +1,5 @@
 ---
-- name: configure sharding role incorrectly
+- name: Configure sharding role incorrectly
 
   hosts: all
 
@@ -9,14 +9,14 @@
 
   tasks:
 
-    - name: set base facts
+    - name: Set base facts
       ansible.builtin.set_fact:
         _sharding_failed: false
 
-    - name: attempt broken replicaset sharding configuration
+    - name: Attempt broken replicaset sharding configuration
       block:
 
-        - name: deploy mongodb
+        - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -27,15 +27,15 @@
 
       rescue:
 
-        - name: set result facts
+        - name: Set result facts
           ansible.builtin.set_fact:
             _sharding_failed: true
 
-    - name: fail on broken replicaset configuration
+    - name: Fail on broken replicaset configuration
       ansible.builtin.fail:
         msg: "broken sharding role configuration operation must fail"
       when: not _sharding_failed
 
 
-- name: include commong converge play
+- name: Include common converge play
   import_playbook: ../common/converge.yml
