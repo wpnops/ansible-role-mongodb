@@ -1,7 +1,7 @@
 ---
 - name: Configure 1 replicaset node
 
-  hosts: all
+  hosts: "{{ groups['all'][:1] | join(':') }}"
 
   vars:
 
@@ -24,9 +24,9 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_mmebers_num] }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 
@@ -40,13 +40,9 @@
       when: not _members_failed
 
 
-- name: Configure 2 replicaset node
+- name: Configure 2 replicaset nodes
 
-  hosts: all
-
-  vars:
-
-    mongodb_replicaset_members_num: 2
+  hosts: "{{ groups['all'][:2] | join(':') }}"
 
   roles:
 
@@ -65,9 +61,9 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 
@@ -81,9 +77,9 @@
       when: not _members_failed
 
 
-- name: Configure 4 replicaset node
+- name: Configure 4 replicaset nodes
 
-  hosts: all
+  hosts: "{{ groups['all'][:4] | join(':') }}"
 
   vars:
 
@@ -106,9 +102,9 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 
@@ -122,9 +118,9 @@
       when: not _members_failed
 
 
-- name: Configure 6 replicaset node
+- name: Configure 6 replicaset nodes
 
-  hosts: all
+  hosts: "{{ groups['all'][:6] | join(':') }}"
 
   vars:
 
@@ -147,9 +143,9 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ (mongodb_addresses | list)[:mongodb_replicaset_members_num] }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 

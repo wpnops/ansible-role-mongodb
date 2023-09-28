@@ -292,12 +292,8 @@
           until: mongodb_status is success
 
     - name: Manage MongoDB replicaset
-      tags:
-        - configure
-        - replicaset
-      when:
-        - mongodb_replicaset_name | default('') != ''
-        - mongodb_replicaset_members | default([]) | length > 2
+      tags: replicaset
+      when: mongodb_replicaset_name | default('') != ''
       block:
 
         - name: Verify MongoDB replicaset member count
