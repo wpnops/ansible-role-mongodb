@@ -1,5 +1,5 @@
 ---
-- name: converge
+- name: Converge
 
   hosts: all
 
@@ -9,7 +9,7 @@
 
   tasks:
 
-    - name: deploy mongodb
+    - name: Deploy mongodb
       ansible.builtin.include_role:
         name: wpnops.mongodb
       vars:

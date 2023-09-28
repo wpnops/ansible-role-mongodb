@@ -1,5 +1,5 @@
 ---
-- name: prepare
+- name: Prepare
 
   hosts: localhost
 
@@ -7,7 +7,7 @@
 
   tasks:
 
-    - name: load required kernel modules into ansible controller
+    - name: Load required kernel modules into ansible controller
       community.general.modprobe:
         name: ip6table_filter
         state: present

@@ -1,0 +1,113 @@
+---
+- name: Rename replica set
+
+  hosts: all
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _rename_failed: false
+
+    - name: Attempt replicaset rename operation
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_replicaset_name: edited
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _rename_failed: true
+
+    - name: Fail on rename success
+      ansible.builtin.fail:
+        msg: "Replicaset rename operation must fail"
+      when: not _rename_failed
+
+
+- name: Change sharding role
+
+  hosts: all
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _sharding_failed: false
+
+    - name: Attempt sharding role change
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_sharding_role: configsvr
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _sharding_failed: true
+
+    - name: Fail on sharding reconfiguration success
+      ansible.builtin.fail:
+        msg: "Shard reconfiguraion operation must fail"
+      when: not _sharding_failed
+
+
+- name: Configure sharding role incorrectly
+
+  hosts: all
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _sharding_failed: false
+
+    - name: Attempt broken replicaset sharding configuration
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_sharding_role: error
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _sharding_failed: true
+
+    - name: Fail on broken replicaset configuration
+      ansible.builtin.fail:
+        msg: "broken sharding role configuration operation must fail"
+      when: not _sharding_failed
