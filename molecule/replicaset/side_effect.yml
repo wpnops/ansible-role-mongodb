@@ -1,4 +1,25 @@
 ---
+- name: Configure 5 replicaset nodes
+
+  hosts: "{{ groups['all'][:5] | join(':') }}"
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Deploy mongodb
+      ansible.builtin.include_role:
+        name: wpnops.mongodb
+      vars:
+        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+        _members: "{{ _addresses | list }}"
+        mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+- name: Include common converge play
+  import_playbook: ../common/converge.yml
+
 - name: Scale down to 5 replicaset nodes
 
   hosts: "{{ groups['all'][:5] | join(':') }}"
