@@ -1,0 +1,90 @@
+---
+- name: Manage MongoDB existing member hosts
+  ansible.builtin.set_fact:
+    _mongodb_existing_host: "{{ true if _existing_host_filter else false }}"
+    _mongodb_add_members: "{{ _add_members_list }}"
+    _mongodb_delete_members: "{{ _delete_members_list }}"
+  vars:
+    _existing_list: "{{ _existing_members | default([]) }}"
+    _existing_hosts: "{{ _existing_list | map('split_with', ':') | map('first') }}"
+    _existing_host_filter: "{{ _existing_hosts | select('equalto', ansible_default_ipv4.address) }}"
+    _add_members_list: "{{ mongodb_replicaset_members | reject('in', _existing_list) }}"
+    _delete_members_list: "{{ _existing_list | reject('in', mongodb_replicaset_members) }}"
+
+- name: Initialize MongoDB replicaset
+  when: not _mongodb_existing_host
+  run_once: true
+  block:
+
+    - name: Create MongoDB replica set
+      community.mongodb.mongodb_replicaset:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        members: "{{ mongodb_replicaset_members }}"
+        validate: false
+
+    - name: Wait for replica set to stabilize
+      community.mongodb.mongodb_status:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        validate: minimal
+        poll: 5
+        interval: 10
+      register: mongodb_rs
+      retries: 3
+      delay: 60
+      until: mongodb_rs is success
+
+- name: Manage MongoDB replicaset members
+  when: _mongodb_existing_host
+  block:
+
+    - name: Gather replica set primary member
+      community.mongodb.mongodb_status:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        validate: minimal
+      register: mongodb_rs
+      retries: 3
+      delay: 60
+      until: mongodb_rs is success
+      run_once: yes
+
+    - name: Determine MongoDB replicaset primary
+      ansible.builtin.set_fact:
+        replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_default_ipv4.address }}"
+      vars:
+        _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
+        _replicaset_primary_filter: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
+        _replicaset_primary_keys: "{{ _replicaset_primary_filter | map(attribute='key') }}"
+        _replicaset_primary_list: "{{ _replicaset_primary_keys | map('split_with', ':') | map('first') }}"
+        _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
+
+    - name: Add new MongoDB replicaset members
+      ansible.builtin.include_tasks: "reconfig.yml"
+      loop: "{{ _mongodb_add_members }}"
+      loop_control:
+        loop_var: _mongodb_member
+      vars:
+        _format_existing: '{"host": "%s"}'
+        _new_member:
+          host: "{{ _mongodb_member }}"
+          votes: 0
+          priority: 0
+        _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"
+        _members_update: "{{ _existing + [_new_member] }}"
+        _add_member: true
+      when: replicaset_primary
+
+    - name: Remove MongoDB replicaset members
+      ansible.builtin.include_tasks: "reconfig.yml"
+      loop: "{{ _mongodb_delete_members }}"
+      loop_control:
+        loop_var: _mongodb_member
+      vars:
+        _members_update: "{{ _existing_members | reject('equalto', _mongodb_member) }}"
+        _add_member: false
+      when: replicaset_primary
+
+- name: Set slave ok for replica set
+  community.mongodb.mongodb_shell:
+    eval: "rs.secondaryOk()"
+  changed_when: false
+  run_once: true
