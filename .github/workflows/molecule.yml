@@ -52,6 +52,7 @@ jobs:
           - name: default
           - name: ufw
           - name: replicaset
+          - name: reconfigure
         image:
           - name: ubuntu2204
             command: /lib/systemd/systemd
