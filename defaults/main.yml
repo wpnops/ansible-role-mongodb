@@ -15,7 +15,6 @@ mongodb_packages_default:
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
-mongodb_release: 7.0
 mongodb_service: mongod
 mongodb_port: '27017'
 mongodb_user_default:

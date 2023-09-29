@@ -1,6 +1,7 @@
 ---
 roles:
   - nephelaiio.plugins
+  - wpnops.mongodb_repo
 collections:
   - community.general
   - community.mongodb
