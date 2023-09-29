@@ -1,0 +1,147 @@
+---
+- name: Configure 1 replicaset node
+
+  hosts: "{{ groups['all'][:1] | join(':') }}"
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: Attempt broken replicaset sharding configuration
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: Fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: Configure 2 replicaset nodes
+
+  hosts: "{{ groups['all'][:2] | join(':') }}"
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: Attempt broken replicaset sharding configuration
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: Fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: Configure 4 replicaset nodes
+
+  hosts: "{{ groups['all'][:4] | join(':') }}"
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: Attempt broken replicaset sharding configuration
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: Fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed
+
+
+- name: Configure 6 replicaset nodes
+
+  hosts: "{{ groups['all'][:6] | join(':') }}"
+
+  roles:
+
+    - nephelaiio.plugins
+
+  tasks:
+
+    - name: Set base facts
+      ansible.builtin.set_fact:
+        _members_failed: false
+
+    - name: Attempt broken replicaset sharding configuration
+      block:
+
+        - name: Deploy mongodb
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('map_format', '%s:' + mongodb_port) | list }}"
+
+      rescue:
+
+        - name: Set result facts
+          ansible.builtin.set_fact:
+            _members_failed: true
+
+    - name: Fail on broken replicaset member configuration
+      ansible.builtin.fail:
+        msg: "broken replicaset member configuration operation must fail"
+      when: not _members_failed

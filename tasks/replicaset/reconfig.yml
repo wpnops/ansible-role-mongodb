@@ -1,0 +1,62 @@
+---
+- name: Reconfigure MongoDB replica set
+  community.mongodb.mongodb_replicaset:
+    replica_set: "{{ mongodb_replicaset_name }}"
+    members: "{{ _existing + [_new_member] }}"
+    reconfigure: true
+    validate: false
+  vars:
+    _format_existing: '{"host": "%s"}'
+    _new_member:
+      host: "{{ _mongodb_new_member }}"
+      votes: 0
+      priority: 0
+    _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"
+  delegate_to: "{{ replicaset_primary }}"
+
+- name: Wait for replica set to stabilize
+  community.mongodb.mongodb_status:
+    replica_set: "{{ mongodb_replicaset_name }}"
+    validate: minimal
+    poll: "{{ mongodb_reconfig_poll }}"
+    interval: "{{ mongodb_reconfig_interval }}"
+  delegate_to: "{{ replicaset_primary }}"
+
+- name: Reconfigure MongoDB replica set
+  community.mongodb.mongodb_replicaset:
+    replica_set: "{{ mongodb_replicaset_name }}"
+    members: "{{ _existing + [_new_member] }}"
+    reconfigure: true
+    validate: false
+  vars:
+    _format_existing: '{"host": "%s"}'
+    _new_member:
+      host: "{{ _mongodb_new_member }}"
+      votes: 1
+      priority: 1
+    _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"
+  delegate_to: "{{ replicaset_primary }}"
+
+- name: Wait for replica set to stabilize
+  community.mongodb.mongodb_status:
+    replica_set: "{{ mongodb_replicaset_name }}"
+    validate: minimal
+    poll: "{{ mongodb_reconfig_poll }}"
+    interval: "{{ mongodb_reconfig_interval }}"
+  delegate_to: "{{ replicaset_primary }}"
+
+- name: Gather MongoDB existing replica set members
+  community.mongodb.mongodb_shell:
+    eval: "rs.status().members"
+  changed_when: false
+  register: mongodb_status
+  retries: 6
+  delay: 10
+  until: mongodb_status is success
+  delegate_to: "{{ replicaset_primary }}"
+
+- name: Compute MongoDB existing replica set members
+  ansible.builtin.set_fact:
+    _existing_members: "{{ _members_list | map(attribute='name') }}"
+  vars:
+    _members_list: "{{ mongodb_status.transformed_output | list }}"
