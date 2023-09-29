@@ -57,7 +57,7 @@
         _replicaset_primary_list: "{{ _replicaset_primary_keys | map('split_with', ':') | map('first') }}"
         _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
-    - name: Include MongoDB replicaset new member tasks
+    - name: Add new MongoDB replicaset members
       ansible.builtin.include_tasks: "reconfig.yml"
       loop: "{{ _mongodb_add_members }}"
       loop_control:
@@ -73,7 +73,7 @@
         _add_member: true
       when: replicaset_primary
 
-    - name: Remove MongoDB replicaset new member tasks
+    - name: Remove MongoDB replicaset members
       ansible.builtin.include_tasks: "reconfig.yml"
       loop: "{{ _mongodb_delete_members }}"
       loop_control:
