@@ -27,7 +27,7 @@
 
     - name: Determine MongoDB replicaset primary
       ansible.builtin.set_fact:
-        replicaset_primary: "{{ ansible_hostname if _replicaset_primary == ansible_default_ipv4.address }}"
+        replicaset_primary: "{{ ansible_fqdn if _replicaset_primary == ansible_default_ipv4.address }}"
       vars:
         _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
         _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
