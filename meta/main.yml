@@ -20,4 +20,4 @@ galaxy_info:
 
 dependencies:
   - role: nephelaiio.plugins
-  - role: wpninfra.mongodb_repo
+  - role: nephelaiio.mongodb_repo
