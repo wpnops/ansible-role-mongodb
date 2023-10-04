@@ -1,0 +1,6 @@
+# This file contains ignores rule violations for ansible-lint
+meta/main.yml schema[meta]
+molecule/common/verify.yml run-once[task]
+molecule/replicaset/converge.yml var-naming[no-role-prefix]
+molecule/replicaset/side_effect.yml var-naming[no-role-prefix]
+tasks/install.yml risky-file-permissions
