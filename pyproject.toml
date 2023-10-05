@@ -14,7 +14,6 @@ ansible = "7.2.0"
 ansible-lint = { version = "*", markers = "platform_system != 'Windows'" }
 molecule = "^6.0.2"
 molecule-docker = "^2.1.0"
-urllib3 = "<2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
