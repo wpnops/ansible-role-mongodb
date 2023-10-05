@@ -19,4 +19,5 @@ galaxy_info:
   galaxy_tags: ['mongodb']
 
 dependencies:
-  - role: nephelaiio.plugins
+  - nephelaiio.plugins
+  - nephelaiio.mongodb_repo
