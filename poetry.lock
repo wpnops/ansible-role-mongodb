@@ -1,13 +1,13 @@
 [[package]]
 name = "ansible"
-version = "7.2.0"
+version = "8.4.0"
 description = "Radically simple IT automation"
 category = "dev"
 optional = false
 python-versions = ">=3.9"
 
 [package.dependencies]
-ansible-core = ">=2.14.2,<2.15.0"
+ansible-core = ">=2.15.4,<2.16.0"
 
 [[package]]
 name = "ansible-compat"
@@ -30,7 +30,7 @@ test = ["coverage", "pip-tools", "pytest (>=7.2.0)", "pytest-mock", "pytest-plus
 
 [[package]]
 name = "ansible-core"
-version = "2.14.10"
+version = "2.15.4"
 description = "Radically simple IT automation"
 category = "dev"
 optional = false
@@ -41,7 +41,7 @@ cryptography = "*"
 jinja2 = ">=3.0.0"
 packaging = "*"
 PyYAML = ">=5.1"
-resolvelib = ">=0.5.3,<0.9.0"
+resolvelib = ">=0.5.3,<1.1.0"
 
 [[package]]
 name = "ansible-lint"
@@ -661,20 +661,20 @@ dev = ["doc8", "flake8", "flake8-import-order", "rstcheck[sphinx]", "sphinx"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "1722e83e6957f76bc69527743b39bca8b92afa97b739dc676d5a408b513608c6"
+content-hash = "0cce8fbdc628bf2e7895f171fc8abf56a2276e1a4388c8daf56a954e9dd67772"
 
 [metadata.files]
 ansible = [
-    {file = "ansible-7.2.0-py3-none-any.whl", hash = "sha256:756a6d8fec6c19ccd7a00ad0f0cb18859f4ab77e0c5063f73a115f3fb75284aa"},
-    {file = "ansible-7.2.0.tar.gz", hash = "sha256:60e2c1a58f1ceb34a190b7c380f7b3386d1e7369061954b1f8b8ca3df76063cc"},
+    {file = "ansible-8.4.0-py3-none-any.whl", hash = "sha256:d601d89a4306934e7c0aae05195fd72c0719287fde165982d0ebac282b4280f1"},
+    {file = "ansible-8.4.0.tar.gz", hash = "sha256:f33c492690592fad12684e9897f6de2da15c9f6e1ecb79137703a06470af2ce6"},
 ]
 ansible-compat = [
     {file = "ansible-compat-4.1.10.tar.gz", hash = "sha256:2be8c7b510d2e15eed1e9ef443209d67d9aec8f427026b88936d4535ff59863d"},
     {file = "ansible_compat-4.1.10-py3-none-any.whl", hash = "sha256:f09c3137c9f5f65d38caed44f1a1565c0e7170df720d461e76839beda6018edb"},
 ]
 ansible-core = [
-    {file = "ansible-core-2.14.10.tar.gz", hash = "sha256:2c5d26d0f8d152020dd92d98f595f63c248a1997b8d74c5c3fb0d2408ec5a487"},
-    {file = "ansible_core-2.14.10-py3-none-any.whl", hash = "sha256:97ab6c2d62940a7a02c4f2505aad5c5e30bb486e8122899c5c147b16e98ef51e"},
+    {file = "ansible-core-2.15.4.tar.gz", hash = "sha256:c1a8aaede985f79e5932ba2163639379f7d8025bfd9b28378db1649a4ef541ed"},
+    {file = "ansible_core-2.15.4-py3-none-any.whl", hash = "sha256:5c57089405406f3004e948127b518b65509e280d524f61f91cc6360303fc388b"},
 ]
 ansible-lint = [
     {file = "ansible-lint-6.20.3.tar.gz", hash = "sha256:7cb8efffad21cb869b0b58894e5cfe3437014ba7c61812c956c72dfebc99a0b8"},
