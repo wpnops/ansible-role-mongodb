@@ -11,8 +11,6 @@ python = "^3.10"
 netaddr = "^0.9.0"
 yamllint = "^1.32.0"
 ansible = "7.2.0"
-pymongo = "^4.5.0"
-python-gnupg = "^0.5.1"
 ansible-lint = { version = "*", markers = "platform_system != 'Windows'" }
 molecule = "^6.0.2"
 molecule-docker = "^2.1.0"
