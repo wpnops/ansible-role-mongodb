@@ -66,6 +66,7 @@
         _format_existing: '{"host": "%s"}'
         _new_member:
           host: "{{ _mongodb_member }}"
+          hidden: true
           votes: 0
           priority: 0
         _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"

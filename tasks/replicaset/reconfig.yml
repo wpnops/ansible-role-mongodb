@@ -22,16 +22,15 @@
     - name: Reconfigure MongoDB replica set
       community.mongodb.mongodb_replicaset:
         replica_set: "{{ mongodb_replicaset_name }}"
-        members: "{{ _existing + [_new_member] }}"
+        members: "{{ _existing + [_update_member] }}"
         reconfigure: true
         validate: false
       vars:
-        _format_existing: '{"host": "%s"}'
-        _new_member:
+        _update_member:
           host: "{{ _mongodb_member }}"
+          hidden: false
           votes: 1
           priority: 1
-        _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"
       delegate_to: "{{ replicaset_primary }}"
 
     - name: Wait for replica set to stabilize
