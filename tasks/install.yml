@@ -84,6 +84,7 @@
             - name: Gather MongoDB existing replica set members
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
+                mongo_cmd: "{{ mongodb_shell | default(omit) }}"
               changed_when: false
               register: mongodb_status
               retries: 6
@@ -236,6 +237,7 @@
     - name: Wait for MongoDB to be up
       community.mongodb.mongodb_shell:
         eval: "db.runCommand({ping: 1})"
+        mongo_cmd: "{{ mongodb_shell | default(omit) }}"
       changed_when: false
       register: mongodb_status
       retries: 6
