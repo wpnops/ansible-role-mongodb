@@ -1,4 +1,5 @@
 ---
+# mongodb_shell: mongosh
 mongodb_packages_default:
   debian:
     - software-properties-common
