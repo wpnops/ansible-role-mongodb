@@ -6,9 +6,8 @@
       ansible.builtin.include_role:
         name: wpnops.mongodb
       vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+        _map_filter: "nephelaiio.plugins.map_format"
+        mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
 
 - name: Include common converge play
@@ -22,9 +21,8 @@
       ansible.builtin.include_role:
         name: wpnops.mongodb
       vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+        _map_filter: "nephelaiio.plugins.map_format"
+        mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
 
 - name: Scale down to 3 replicaset nodes
@@ -34,9 +32,8 @@
       ansible.builtin.include_role:
         name: wpnops.mongodb
       vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+        _map_filter: "nephelaiio.plugins.map_format"
+        mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
 
 - name: Configure 1 replicaset node
@@ -52,9 +49,8 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -80,9 +76,8 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -108,9 +103,8 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -136,9 +130,8 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts

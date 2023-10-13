@@ -14,9 +14,8 @@
             name: wpnops.mongodb
           vars:
             mongodb_replicaset_name: edited
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -43,9 +42,8 @@
             name: wpnops.mongodb
           vars:
             mongodb_sharding_role: configsvr
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -72,9 +70,8 @@
             name: wpnops.mongodb
           vars:
             mongodb_sharding_role: error
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_filter: "nephelaiio.plugins.map_format"
+            mongodb_replicaset_members: "{{ play_hosts | map(_map_filter, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
