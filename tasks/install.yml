@@ -48,6 +48,22 @@
         - mongodb_replicaset_name | default('') != ''
         - _member_count not in _member_counts
 
+    - name: Remove conflicting hosts entries
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        state: absent
+
+    - name: Add host entries for cluster members
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '.*{{ item }}.*'
+        line: >
+          {{ hostvars[item]['ansible_default_ipv4']['address'] }}
+          {{ hostvars[item]['ansible_fqdn'] }}
+          {{ hostvars[item]['ansible_hostname'] }}
+      loop: "{{ play_hosts }}"
+
     - name: Stat MongoDB configuration file
       ansible.builtin.stat:
         path: "{{ mongodb_config_path }}"
