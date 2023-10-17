@@ -7,17 +7,17 @@
     validate: false
   delegate_to: "{{ replicaset_primary }}"
 
-- name: Wait for replica set to stabilize
-  community.mongodb.mongodb_status:
-    replica_set: "{{ mongodb_replicaset_name }}"
-    validate: minimal
-    poll: "{{ mongodb_reconfig_poll }}"
-    interval: "{{ mongodb_reconfig_interval }}"
-  delegate_to: "{{ replicaset_primary }}"
-
 - name: Change MongoDB replicaset priority new members
   when: _add_member | default(false) | bool
   block:
+
+    - name: Wait for replica set to stabilize
+      community.mongodb.mongodb_status:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        validate: minimal
+        poll: "{{ mongodb_reconfig_poll }}"
+        interval: "{{ mongodb_reconfig_interval }}"
+      delegate_to: "{{ replicaset_primary }}"
 
     - name: Reconfigure MongoDB replica set
       community.mongodb.mongodb_replicaset:
