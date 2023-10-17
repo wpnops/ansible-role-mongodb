@@ -5,12 +5,10 @@ mongodb_packages_default:
     - software-properties-common
     - apt-transport-https
     - ca-certificates
-    - ufw
     - mongodb-org
     - mongodb-mongosh
   redhat:
     - ca-certificates
-    - ufw
     - mongodb-org
     - mongodb-mongosh
 mongodb_pip_packages:
@@ -32,7 +30,7 @@ mongodb_log_path_default:
 mongodb_storage_dbpath_default:
   debian: /var/lib/mongodb
   redhat: /var/lib/mongo
-mongodb_replicaset_name: rs0
+# mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_members: []
 mongodb_src_addresses_list: []
