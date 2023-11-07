@@ -12,14 +12,11 @@ on:
       - "*"
 
 defaults:
-
   run:
     working-directory: 'wpnops.mongodb'
 
 jobs:
-
   release:
-
     name: Release
     runs-on: ubuntu-latest
     steps:

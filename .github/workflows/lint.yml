@@ -2,7 +2,6 @@
 name: lint
 
 on:
-
   pull_request:
   push:
     branches:
@@ -11,18 +10,14 @@ on:
     - cron: "0 5 * * 5"
 
 defaults:
-
   run:
     working-directory: 'wpnops.mongodb'
 
 jobs:
-
   lint:
-
     name: lint
     runs-on: ubuntu-latest
     steps:
-
       - name: Check out the codebase
         uses: actions/checkout@v4
         with:

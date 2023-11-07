@@ -221,25 +221,5 @@
                 state: stopped
                 enabled: false
 
-- name: Manage MongoDB services
-  tags: always
-  block:
-
-    - name: Manage MongoDB service
-      ansible.builtin.service:
-        name: "{{ mongodb_service }}"
-        state: started
-        enabled: true
-
-    - name: Flush handlers
-      ansible.builtin.meta: flush_handlers
-
-    - name: Wait for MongoDB to be up
-      community.mongodb.mongodb_shell:
-        eval: "db.runCommand({ping: 1})"
-        mongo_cmd: "{{ mongodb_shell | default(omit) }}"
-      changed_when: false
-      register: mongodb_status
-      retries: 6
-      delay: 10
-      until: mongodb_status is success
+- name: Include service tasks
+  ansible.builtin.include_tasks: service.yml
