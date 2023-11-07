@@ -16,7 +16,8 @@ mongodb_packages_default:
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
-mongodb_service: mongod
+mongodb_service_name: mongod
+mongodb_service_state: started
 mongodb_port: '27017'
 mongodb_user_default:
   debian: mongodb
