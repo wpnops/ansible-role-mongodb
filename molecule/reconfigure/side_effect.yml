@@ -1,14 +1,7 @@
 ---
 - name: Rename replica set
-
   hosts: all
-
-  roles:
-
-    - nephelaiio.plugins
-
   tasks:
-
     - name: Set base facts
       ansible.builtin.set_fact:
         _rename_failed: false
@@ -23,7 +16,7 @@
             mongodb_replicaset_name: edited
             mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
             mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 
@@ -38,15 +31,8 @@
 
 
 - name: Change sharding role
-
   hosts: all
-
-  roles:
-
-    - nephelaiio.plugins
-
   tasks:
-
     - name: Set base facts
       ansible.builtin.set_fact:
         _sharding_failed: false
@@ -61,7 +47,7 @@
             mongodb_sharding_role: configsvr
             mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
             mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 
@@ -76,15 +62,8 @@
 
 
 - name: Configure sharding role incorrectly
-
   hosts: all
-
-  roles:
-
-    - nephelaiio.plugins
-
   tasks:
-
     - name: Set base facts
       ansible.builtin.set_fact:
         _sharding_failed: false
@@ -99,7 +78,7 @@
             mongodb_sharding_role: error
             mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
             mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
 

@@ -5,3 +5,5 @@ fileignoreconfig:
     ignore_detectors: [filecontent]
   - filename: .github/workflows/release.yml
     ignore_detectors: [filecontent]
+  - filename: molecule/common/verify.yml
+    ignore_detectors: [filecontent]

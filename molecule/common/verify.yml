@@ -1,21 +1,11 @@
 ---
 - name: Verify mongodb
-
   hosts: all
-
   become: true
-
-  roles:
-
-    - nephelaiio.plugins
-
   vars:
-
     mongodb_test:
       name: "Test"
-
   tasks:
-
     - name: Retrieve MongoDB replicaset status
       community.mongodb.mongodb_status:
         replica_set: "{{ mongodb_replicaset_name }}"
@@ -31,13 +21,12 @@
       vars:
         _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
         _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
-        _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('split_with', ':') | map('first') }}"
+        _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
         _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
 
     - name: Evaluate MongoDB shell commands
       when: replicaset_primary
       block:
-
         - name: Create MongoDB test database
           community.mongodb.mongodb_shell:
             login_database: "testdb"
