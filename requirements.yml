@@ -2,6 +2,7 @@
 roles:
   - name: nephelaiio.mongodb_repo
 collections:
+  - nephelaiio.plugins
   - community.general
   - community.mongodb
   - ansible.utils
