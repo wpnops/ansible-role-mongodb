@@ -6,7 +6,7 @@
     _mongodb_delete_members: "{{ _delete_members_list }}"
   vars:
     _existing_list: "{{ _existing_members | default([]) }}"
-    _existing_hosts: "{{ _existing_list | map('split_with', ':') | map('first') }}"
+    _existing_hosts: "{{ _existing_list | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _existing_host_filter: "{{ _existing_hosts | select('equalto', ansible_default_ipv4.address) }}"
     _add_members_list: "{{ mongodb_replicaset_members | reject('in', _existing_list) }}"
     _delete_members_list: "{{ _existing_list | reject('in', mongodb_replicaset_members) }}"
@@ -64,7 +64,7 @@
           hidden: true
           votes: 0
           priority: 0
-        _existing: "{{ _existing_members | map('map_format', _format_existing) | map('from_json') }}"
+        _existing: "{{ _existing_members | map('nephelaiio.plugins.map_format', _format_existing) | map('from_json') }}"
         _members_update: "{{ _existing + [_new_member] }}"
         _add_member: true
       when: replicaset_primary

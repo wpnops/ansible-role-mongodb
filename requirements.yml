@@ -1,6 +1,5 @@
 ---
 roles:
-  - name: nephelaiio.plugins
   - name: nephelaiio.mongodb_repo
 collections:
   - community.general

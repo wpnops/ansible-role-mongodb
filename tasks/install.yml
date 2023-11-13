@@ -5,11 +5,11 @@
 
     - name: Set variable overrides
       ansible.builtin.set_fact:
-        _mongodb_packages: "{{ mongodb_packages | default(mongodb_packages_default | sorted_get(overrides)) }}"
-        _mongodb_user: "{{ mongodb_user | default(mongodb_user_default | sorted_get(overrides)) }}"
-        _mongodb_group: "{{ mongodb_group | default(mongodb_group_default | sorted_get(overrides)) }}"
-        _mongodb_storage_dbpath: "{{ mongodb_storage_dbpath | default(mongodb_storage_dbpath_default | sorted_get(overrides)) }}"
-        _mongodb_log_path: "{{ mongodb_log_path | default(mongodb_log_path_default | sorted_get(overrides)) }}"
+        _mongodb_packages: "{{ mongodb_packages | default(mongodb_packages_default | nephelaiio.plugins.sorted_get(overrides)) }}"
+        _mongodb_user: "{{ mongodb_user | default(mongodb_user_default | nephelaiio.plugins.sorted_get(overrides)) }}"
+        _mongodb_group: "{{ mongodb_group | default(mongodb_group_default | nephelaiio.plugins.sorted_get(overrides)) }}"
+        _mongodb_storage_dbpath: "{{ mongodb_storage_dbpath | default(mongodb_storage_dbpath_default | nephelaiio.plugins.sorted_get(overrides)) }}"
+        _mongodb_log_path: "{{ mongodb_log_path | default(mongodb_log_path_default | nephelaiio.plugins.sorted_get(overrides)) }}"
       vars:
         overrides:
           - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}"
