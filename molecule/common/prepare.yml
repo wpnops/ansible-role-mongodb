@@ -1,13 +1,13 @@
 ---
 - name: Prepare
-
   hosts: localhost
-
   become: true
-
   tasks:
-
     - name: Load required kernel modules into ansible controller
       community.general.modprobe:
         name: ip6table_filter
         state: present
+
+    - name: Configure mongodb repository
+      ansible.builtin.include_role:
+        name: nephelaiio.mongodb_repo
