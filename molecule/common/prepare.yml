@@ -1,5 +1,5 @@
 ---
-- name: Prepare
+- name: Prepare Ansible controller
   hosts: localhost
   become: true
   tasks:
@@ -8,6 +8,10 @@
         name: ip6table_filter
         state: present
 
+- name: Prepare instances
+  hosts: all
+  become: true
+  tasks:
     - name: Configure mongodb repository
       ansible.builtin.include_role:
         name: nephelaiio.mongodb_repo
