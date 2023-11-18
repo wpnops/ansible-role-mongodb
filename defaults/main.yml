@@ -8,14 +8,15 @@ mongodb_packages_default:
     - ufw
     - mongodb-org
     - mongodb-mongosh
+    - python3-pymongo
+    - python3-gnupg
   redhat:
     - ca-certificates
     - ufw
     - mongodb-org
     - mongodb-mongosh
-mongodb_pip_packages:
-  - pymongo
-  - python-gnupg
+    - python3-pymongo
+    - python3-gnupg
 mongodb_service_name: mongod
 mongodb_service_state: started
 mongodb_port: '27017'

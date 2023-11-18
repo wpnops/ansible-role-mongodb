@@ -101,10 +101,6 @@
 - name: Install MongoDB pip packages
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
-  register: pip_res
-  retries: 5
-  delay: 5
-  until: pip_res is success
 
 - name: Install MongoDB pre-requisites for debian
   ansible.builtin.apt:
@@ -113,29 +109,18 @@
       - gnupg
     update_cache: true
   when: ansible_os_family | lower == "debian"
-  register: apt_res
-  retries: 5
-  delay: 5
-  until: apt_res is success
 
 - name: Install MongoDB pre-requisites for redhat
   ansible.builtin.yum:
     name:
       - gnupg2
+      - epel-release
     update_cache: true
   when: ansible_os_family | lower == "redhat"
-  register: yum_res
-  retries: 5
-  delay: 5
-  until: yum_res is success
 
 - name: Install MongoDB packages
   ansible.builtin.package:
     name: "{{ _mongodb_packages }}"
-  register: package_res
-  retries: 5
-  delay: 5
-  until: package_res is success
 
 - name: Configure mongodb
   tags: configure
