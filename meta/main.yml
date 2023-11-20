@@ -18,5 +18,4 @@ galaxy_info:
         - all
   galaxy_tags: ['mongodb']
 
-dependencies:
-  - role: nephelaiio.mongodb_repo
+dependencies: []

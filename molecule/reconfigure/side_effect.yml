@@ -19,7 +19,6 @@
             mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
-
         - name: Set result facts
           ansible.builtin.set_fact:
             _rename_failed: true
@@ -39,7 +38,6 @@
 
     - name: Attempt sharding role change
       block:
-
         - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
@@ -50,7 +48,6 @@
             mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
-
         - name: Set result facts
           ansible.builtin.set_fact:
             _sharding_failed: true
@@ -70,7 +67,6 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-
         - name: Deploy mongodb
           ansible.builtin.include_role:
             name: wpnops.mongodb
@@ -81,7 +77,6 @@
             mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
-
         - name: Set result facts
           ansible.builtin.set_fact:
             _sharding_failed: true
