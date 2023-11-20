@@ -5,12 +5,16 @@
 
     - name: Set variable overrides
       ansible.builtin.set_fact:
-        _mongodb_packages: "{{ mongodb_packages | default(mongodb_packages_default | nephelaiio.plugins.sorted_get(overrides)) }}"
-        _mongodb_user: "{{ mongodb_user | default(mongodb_user_default | nephelaiio.plugins.sorted_get(overrides)) }}"
-        _mongodb_group: "{{ mongodb_group | default(mongodb_group_default | nephelaiio.plugins.sorted_get(overrides)) }}"
-        _mongodb_storage_dbpath: "{{ mongodb_storage_dbpath | default(mongodb_storage_dbpath_default | nephelaiio.plugins.sorted_get(overrides)) }}"
-        _mongodb_log_path: "{{ mongodb_log_path | default(mongodb_log_path_default | nephelaiio.plugins.sorted_get(overrides)) }}"
+        _mongodb_packages: "{{ mongodb_packages }}"
+        _mongodb_user: "{{ mongodb_user | default(_user_default) }}"
+        _mongodb_group: "{{ mongodb_group | default(_group_default) }}"
+        _mongodb_storage_dbpath: "{{ mongodb_storage_dbpath | default(_storage_default) }}"
+        _mongodb_log_path: "{{ mongodb_log_path | default(_log_default) }}"
       vars:
+        _user_default: "{{ mongodb_user_default | nephelaiio.plugins.sorted_get(overrides) }}"
+        _group_default: "{{ mongodb_group_default | nephelaiio.plugins.sorted_get(overrides) }}"
+        _storage_default: "{{ mongodb_storage_dbpath_default | nephelaiio.plugins.sorted_get(overrides) }}"
+        _log_default: "{{ mongodb_log_path_default | nephelaiio.plugins.sorted_get(overrides) }}"
         overrides:
           - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}"
           - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
@@ -86,11 +90,9 @@
                 eval: "rs.status().members"
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
               changed_when: false
-              register: mongodb_status
+              run_once: true
               retries: 6
               delay: 10
-              until: mongodb_status is success
-              run_once: yes
 
             - name: Compute MongoDB existing replica set members
               ansible.builtin.set_fact:
@@ -102,39 +104,12 @@
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
   register: pip_res
-  retries: 5
-  delay: 5
   until: pip_res is success
-
-- name: Install MongoDB pre-requisites for debian
-  ansible.builtin.apt:
-    name:
-      - gpg-agent
-      - gnupg
-    update_cache: true
-  when: ansible_os_family | lower == "debian"
-  register: apt_res
-  retries: 5
-  delay: 5
-  until: apt_res is success
-
-- name: Install MongoDB pre-requisites for redhat
-  ansible.builtin.yum:
-    name:
-      - gnupg2
-    update_cache: true
-  when: ansible_os_family | lower == "redhat"
-  register: yum_res
-  retries: 5
-  delay: 5
-  until: yum_res is success
 
 - name: Install MongoDB packages
   ansible.builtin.package:
     name: "{{ _mongodb_packages }}"
   register: package_res
-  retries: 5
-  delay: 5
   until: package_res is success
 
 - name: Configure mongodb

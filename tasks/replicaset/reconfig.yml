@@ -45,10 +45,8 @@
   community.mongodb.mongodb_shell:
     eval: "rs.status().members"
   changed_when: false
-  register: mongodb_status
   retries: 6
   delay: 10
-  until: mongodb_status is success
   delegate_to: "{{ replicaset_primary }}"
 
 - name: Compute MongoDB existing replica set members
