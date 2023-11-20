@@ -1,6 +1,6 @@
 ---
 # mongodb_shell: mongosh
-mongodb_packages_default:
+mongodb_packages:
   - ca-certificates
   - ufw
   - mongodb-org
