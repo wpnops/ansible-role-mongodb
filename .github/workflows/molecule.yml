@@ -19,6 +19,7 @@ jobs:
     strategy:
       matrix:
         scenario:
+          - name: lock
           - name: install
           - name: ufw
           - name: replicaset
