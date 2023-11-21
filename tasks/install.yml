@@ -101,17 +101,29 @@
               vars:
                 _members_list: "{{ mongodb_status.transformed_output | list }}"
 
+- name: Release package holds
+  ansible.builtin.include_tasks: lock.yml
+  vars:
+    _lock_state: install
+
 - name: Install MongoDB pip packages
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
-  register: pip_res
-  until: pip_res is success
+    extra_args: "--user"
 
-- name: Install MongoDB packages
-  ansible.builtin.package:
-    name: "{{ _mongodb_packages }}"
-  register: package_res
-  until: package_res is success
+- name: Install packages and configure package holds
+  block:
+    - name: Install MongoDB packages
+      ansible.builtin.package:
+        name: "{{ _mongodb_packages }}"
+      register: package_res
+      until: package_res is success
+
+  always:
+    - name: Configure package holds
+      ansible.builtin.include_tasks: lock.yml
+      vars:
+        _lock_state: hold
 
 - name: Configure mongodb
   tags: configure
@@ -123,6 +135,7 @@
         dest: "{{ mongodb_config_path }}"
         owner: "{{ _mongodb_user }}"
         group: "{{ _mongodb_group }}"
+        mode: 0644
       notify: Restart MongoDB
       register: config_manage
 

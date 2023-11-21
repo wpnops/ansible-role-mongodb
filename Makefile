@@ -1,6 +1,6 @@
 .PHONY: all ${MAKECMDGOALS}
 
-MOLECULE_SCENARIO ?= default
+MOLECULE_SCENARIO ?= install
 MOLECULE_DOCKER_IMAGE ?= ubuntu2004
 GALAXY_API_KEY ?=
 GITHUB_REPOSITORY ?= $$(git config --get remote.origin.url | cut -d: -f 2 | cut -d. -f 1)
@@ -20,7 +20,7 @@ install:
 lint: install
 	poetry run yamllint .
 	poetry run ansible-lint .
-	poetry run molecule syntax
+	poetry run molecule syntax -s ${MOLECULE_SCENARIO}
 
 roles:
 	[ -f ${REQUIREMENTS} ] && yq '.$@[] | .name' -r < ${REQUIREMENTS} \
