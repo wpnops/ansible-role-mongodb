@@ -89,11 +89,12 @@
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
-              changed_when: false
               retries: 6
               delay: 10
-              run_once: true
               register: mongodb_status
+              until: mongodb_status is success
+              changed_when: false
+              run_once: true
 
             - name: Compute MongoDB existing replica set members
               ansible.builtin.set_fact:
