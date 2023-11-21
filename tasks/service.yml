@@ -16,8 +16,6 @@
         eval: "db.runCommand({ping: 1})"
         mongo_cmd: "{{ mongodb_shell | default(omit) }}"
       changed_when: false
-      register: mongodb_status
       retries: 6
       delay: 10
-      until: mongodb_status is success
       when: mongodb_service_state != "stopped"
