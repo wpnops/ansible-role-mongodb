@@ -1,6 +1,7 @@
 ---
 roles:
   - name: nephelaiio.mongodb_repo
+  - name: robertdebock.update
 collections:
   - nephelaiio.plugins
   - community.general
