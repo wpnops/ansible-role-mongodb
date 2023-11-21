@@ -1,5 +1,5 @@
 ---
-- name: Converge
+- name: Deploy MongoDB
   hosts: all
   tasks:
     - name: Deploy mongodb

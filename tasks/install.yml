@@ -104,7 +104,7 @@
 - name: Release package holds
   ansible.builtin.include_tasks: lock.yml
   vars:
-    _lock_state: hold
+    _lock_state: install
 
 - name: Install MongoDB pip packages
   ansible.builtin.pip:
@@ -123,7 +123,7 @@
     - name: Configure package holds
       ansible.builtin.include_tasks: lock.yml
       vars:
-        _lock_state: install
+        _lock_state: hold
 
 - name: Configure mongodb
   tags: configure
