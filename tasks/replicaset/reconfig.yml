@@ -44,11 +44,12 @@
 - name: Gather MongoDB existing replica set members
   community.mongodb.mongodb_shell:
     eval: "rs.status().members"
-  changed_when: false
   retries: 6
   delay: 10
-  delegate_to: "{{ replicaset_primary }}"
   register: mongodb_status
+  until: mongodb_status is success
+  delegate_to: "{{ replicaset_primary }}"
+  changed_when: false
 
 - name: Compute MongoDB existing replica set members
   ansible.builtin.set_fact:
