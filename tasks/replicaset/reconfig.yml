@@ -7,7 +7,7 @@
     validate: false
   delegate_to: "{{ replicaset_primary }}"
 
-- name: Change MongoDB replicaset priority new members
+- name: Add new members to MongoDB replicaset
   when: _add_member | default(false) | bool
   block:
 
@@ -41,7 +41,7 @@
         interval: "{{ mongodb_reconfig_interval }}"
       delegate_to: "{{ replicaset_primary }}"
 
-- name: Gather MongoDB existing replica set members
+- name: Query existing MongoDB replica set members
   community.mongodb.mongodb_shell:
     eval: "rs.status().members"
   retries: 6
@@ -51,7 +51,7 @@
   delegate_to: "{{ replicaset_primary }}"
   changed_when: false
 
-- name: Compute MongoDB existing replica set members
+- name: Record existing MongoDB replica set members
   ansible.builtin.set_fact:
     _existing_members: "{{ _members_list | map(attribute='name') }}"
   vars:
