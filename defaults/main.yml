@@ -25,6 +25,7 @@ mongodb_log_path_default:
 mongodb_storage_dbpath_default:
   debian: /var/lib/mongodb
   redhat: /var/lib/mongo
+mongodb_storage_oplogminhours: 72
 mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_members: []

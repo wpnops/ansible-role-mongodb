@@ -7,6 +7,7 @@ systemLog:
   destination: file
 storage:
   dbPath: {{ _mongodb_storage_dbpath }}
+  oplogMinRetentionHours: {{ _mongodb_storage_oplogminhours }}
   journal:
     commitIntervalMs: 100
 replication:
