@@ -9,7 +9,7 @@
         _mongodb_user: "{{ mongodb_user | default(_user_default) }}"
         _mongodb_group: "{{ mongodb_group | default(_group_default) }}"
         _mongodb_storage_dbpath: "{{ mongodb_storage_dbpath | default(_storage_default) }}"
-        _mongodb_storage_oplogretention: "{{ mongodb_storage_oplogretention }}"
+        _mongodb_storage_oplogretention: "{{ mongodb_storage_oplogminhours }}"
         _mongodb_log_path: "{{ mongodb_log_path | default(_log_default) }}"
       vars:
         _user_default: "{{ mongodb_user_default | nephelaiio.plugins.sorted_get(overrides) }}"
