@@ -1,4 +1,9 @@
 ---
+- name: Install MongoDB pip packages
+  ansible.builtin.pip:
+    name: "{{ mongodb_pip_packages }}"
+    extra_args: "--user"
+
 - name: Manage MongoDB existing member hosts
   ansible.builtin.set_fact:
     _mongodb_existing_host: "{{ true if _existing_host_filter else false }}"
@@ -15,7 +20,6 @@
   when: not _mongodb_existing_host
   run_once: true
   block:
-
     - name: Create MongoDB replica set
       community.mongodb.mongodb_replicaset:
         replica_set: "{{ mongodb_replicaset_name }}"
@@ -36,7 +40,6 @@
 - name: Manage MongoDB replicaset members
   when: _mongodb_existing_host
   block:
-
     - name: Gather replica set primary member
       community.mongodb.mongodb_shell:
         eval: "rs.isMaster().secondary"
