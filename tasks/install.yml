@@ -2,17 +2,10 @@
 - name: Install MongoDB pips
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
-    extra_args: "{{ mongodb_pip_args }}"
-  when: ansible_distribution != "Debian" or ansible_distribution_major_version is version("12", "<")
-
-- name: Install MongoDB pip packages
-  ansible.builtin.package:
-    name:
-      - python3-pymongo
-      - python3-gnupg
-  when:
-    - ansible_distribution == "Debian"
-    - ansible_distribution_major_version is version("12", ">=")
+    extra_args: "{{ mongodb_pip_args }} {{ _distro_args }}"
+  vars:
+    _is_debian12: "{{ ansible_distribution != 'Debian' or ansible_distribution_major_version is version('12', '>=') }}"
+    _distro_args: "{{ '--break-system-packages' if _is_debian12 else '' }}"
 
 - name: Verify MongoDB prerequesites
   tags: always
