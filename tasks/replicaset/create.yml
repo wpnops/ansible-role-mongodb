@@ -1,9 +1,4 @@
 ---
-- name: Install MongoDB pip packages
-  ansible.builtin.pip:
-    name: "{{ mongodb_pip_packages }}"
-    extra_args: "--user"
-
 - name: Manage MongoDB existing member hosts
   ansible.builtin.set_fact:
     _mongodb_existing_host: "{{ true if _existing_host_filter else false }}"

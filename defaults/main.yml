@@ -8,6 +8,7 @@ mongodb_packages:
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
+mongodb_pip_args: "--user"
 mongodb_service_name: mongod
 mongodb_service_state: started
 mongodb_port: '27017'
