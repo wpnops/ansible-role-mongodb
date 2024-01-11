@@ -2,7 +2,19 @@
 - name: Install MongoDB pip packages
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
-    extra_args: "--user"
+    extra_args: "{{ mongodb_pip_args }}"
+  when:
+    - ansible_distribution != "Debian" or ansible_distribution_major_version is version("12.0", "<"))
+    - mongodb_pip_install
+
+- name: Install MongoDB apt packages
+  ansible.builtin.packages:
+    name:
+      - python3-pymongo
+      - python3-gnupg
+  when:
+    - ansible_distribution == "Debian"
+    - ansible_distribution_major_version is version("12.0", ">="))
 
 - name: Manage MongoDB existing member hosts
   ansible.builtin.set_fact:
