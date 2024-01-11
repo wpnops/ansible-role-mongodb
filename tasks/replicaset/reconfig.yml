@@ -5,19 +5,20 @@
     members: "{{ _members_update }}"
     reconfigure: true
     validate: false
+  become: false
   delegate_to: "{{ replicaset_primary }}"
 
 - name: Add new members to MongoDB replicaset
   when: _add_member | default(false) | bool
+  delegate_to: "{{ replicaset_primary }}"
+  become: false
   block:
-
     - name: Wait for replica set to stabilize
       community.mongodb.mongodb_status:
         replica_set: "{{ mongodb_replicaset_name }}"
         validate: minimal
         poll: "{{ mongodb_reconfig_poll }}"
         interval: "{{ mongodb_reconfig_interval }}"
-      delegate_to: "{{ replicaset_primary }}"
 
     - name: Reconfigure MongoDB replica set
       community.mongodb.mongodb_replicaset:
@@ -31,7 +32,6 @@
           hidden: false
           votes: 1
           priority: 1
-      delegate_to: "{{ replicaset_primary }}"
 
     - name: Wait for replica set to stabilize
       community.mongodb.mongodb_status:
@@ -39,11 +39,11 @@
         validate: minimal
         poll: "{{ mongodb_reconfig_poll }}"
         interval: "{{ mongodb_reconfig_interval }}"
-      delegate_to: "{{ replicaset_primary }}"
 
 - name: Query existing MongoDB replica set members
   community.mongodb.mongodb_shell:
     eval: "rs.status().members"
+  become: false
   retries: 6
   delay: 10
   register: mongodb_status

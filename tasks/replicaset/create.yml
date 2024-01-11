@@ -15,12 +15,12 @@
   when: not _mongodb_existing_host
   run_once: true
   block:
-
     - name: Create MongoDB replica set
       community.mongodb.mongodb_replicaset:
         replica_set: "{{ mongodb_replicaset_name }}"
         members: "{{ mongodb_replicaset_members }}"
         validate: false
+      become: false
 
     - name: Wait for replica set to stabilize
       community.mongodb.mongodb_status:
@@ -28,6 +28,7 @@
         validate: minimal
         poll: 5
         interval: 10
+      become: false
       retries: 3
       delay: 60
       register: mongodb_rs
@@ -36,10 +37,10 @@
 - name: Manage MongoDB replicaset members
   when: _mongodb_existing_host
   block:
-
     - name: Gather replica set primary member
       community.mongodb.mongodb_shell:
         eval: "rs.isMaster().secondary"
+      become: false
       retries: 3
       delay: 60
       register: mongodb_rs
@@ -85,11 +86,13 @@
         validate: minimal
         poll: "{{ mongodb_reconfig_poll }}"
         interval: "{{ mongodb_reconfig_interval }}"
+      become: false
       delegate_to: "{{ replicaset_primary }}"
       when: replicaset_primary
 
 - name: Set slave ok for replica set
   community.mongodb.mongodb_shell:
     eval: "rs.secondaryOk()"
+  become: false
   changed_when: false
   run_once: true

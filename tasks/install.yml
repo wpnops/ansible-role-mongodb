@@ -61,7 +61,6 @@
     - name: Verify MongoDB configuration
       when: _mongodb_config_file.stat.exists
       block:
-
         - name: Slurp MongoDB configuration
           ansible.builtin.slurp:
             path: "{{ mongodb_config_path }}"
@@ -85,7 +84,6 @@
         - name: Retrieve MongoDB existing replicaset members
           when: mongodb_replicaset_name | default('') != ''
           block:
-
             - name: Gather MongoDB existing replica set members
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
@@ -112,6 +110,7 @@
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
     extra_args: "--user"
+  become: false
 
 - name: Install packages and configure package holds
   block:
@@ -130,7 +129,6 @@
 - name: Configure mongodb
   tags: configure
   block:
-
     - name: Configure mongodb
       ansible.builtin.template:
         src: mongodb.conf.j2
@@ -147,11 +145,9 @@
     - name: Manage firewall
       when: ('ufw' in services) or ('ufw.service' in services)
       block:
-
         - name: Configure ufw access rules
           when: mongodb_firewall_state != "stopped"
           block:
-
             - name: Configure ssh firewall access
               community.general.ufw:
                 state: enabled
@@ -195,7 +191,6 @@
         - name: Disable ufw service
           when: mongodb_firewall_state == "stopped"
           block:
-
             - name: Query ufw status
               ansible.builtin.command: ufw status
               changed_when: false
