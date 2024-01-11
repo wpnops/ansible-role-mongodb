@@ -4,7 +4,7 @@
     name: "{{ mongodb_pip_packages }}"
     extra_args: "{{ mongodb_pip_args }} {{ _distro_args }}"
   vars:
-    _is_debian12: "{{ ansible_distribution != 'Debian' or ansible_distribution_major_version is version('12', '>=') }}"
+    _is_debian12: "{{ ansible_distribution == 'Debian' and ansible_distribution_major_version is version('12', '>=') }}"
     _distro_args: "{{ '--break-system-packages' if _is_debian12 else '' }}"
 
 - name: Verify MongoDB prerequesites
