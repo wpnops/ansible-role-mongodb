@@ -8,7 +8,7 @@
     - mongodb_pip_install
 
 - name: Install MongoDB apt packages
-  ansible.builtin.packages:
+  ansible.builtin.package:
     name:
       - python3-pymongo
       - python3-gnupg
