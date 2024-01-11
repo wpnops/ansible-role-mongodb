@@ -3,7 +3,6 @@
   ansible.builtin.include_tasks: "install.yml"
   tags: install
 
-- name: Create MongoDB replicaset
-  ansible.builtin.include_tasks: "replicaset/create.yml"
-  when: mongodb_replicaset_name | default('') != ''
-  tags: replicaset
+- name: Configure MongoDB
+  ansible.builtin.include_tasks: "configure.yml"
+  tags: configure
