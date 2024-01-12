@@ -1,10 +1,11 @@
 ---
 # mongodb_shell: mongosh
 mongodb_packages:
-  - ca-certificates
-  - ufw
   - mongodb-org
   - mongodb-mongosh
+mongodb_requirements:
+  - ca-certificates
+  - ufw
 mongodb_pip_packages:
   - pymongo
   - python-gnupg
