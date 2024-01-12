@@ -118,11 +118,6 @@
   ansible.builtin.package:
     name: "{{ mongodb_requirements }}"
 
-- name: Install MongoDB pip packages
-  ansible.builtin.pip:
-    name: "{{ mongodb_pip_packages }}"
-    extra_args: "--user"
-
 - name: Install packages and configure package holds
   block:
     - name: Install MongoDB packages
