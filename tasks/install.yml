@@ -108,6 +108,10 @@
   vars:
     _lock_state: install
 
+- name: Install MongoDB prerequisites
+  ansible.builtin.package:
+    name: "{{ mongodb_requirements }}"
+
 - name: Install MongoDB pip packages
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
@@ -118,8 +122,6 @@
     - name: Install MongoDB packages
       ansible.builtin.package:
         name: "{{ _mongodb_packages }}"
-      register: package_res
-      until: package_res is success
 
   always:
     - name: Configure package holds
