@@ -4,7 +4,8 @@
     name: "{{ mongodb_pip_packages }}"
     extra_args: "{{ mongodb_pip_args }} {{ _distro_args }}"
   vars:
-    _is_debian12: "{{ ansible_distribution == 'Debian' and ansible_distribution_major_version is version('12', '>=') }}"
+    _major_version: "{{ ansible_distribution_major_version }}"
+    _is_debian12: "{{ ansible_distribution == 'Debian' and _major_version is version('12', '>=') }}"
     _distro_args: "{{ '--break-system-packages' if _is_debian12 else '' }}"
 
 - name: Verify MongoDB prerequesites
@@ -113,13 +114,20 @@
   vars:
     _lock_state: install
 
+- name: Install MongoDB prerequisites
+  ansible.builtin.package:
+    name: "{{ mongodb_requirements }}"
+
+- name: Install MongoDB pip packages
+  ansible.builtin.pip:
+    name: "{{ mongodb_pip_packages }}"
+    extra_args: "--user"
+
 - name: Install packages and configure package holds
   block:
     - name: Install MongoDB packages
       ansible.builtin.package:
         name: "{{ _mongodb_packages }}"
-      register: package_res
-      until: package_res is success
 
   always:
     - name: Configure package holds

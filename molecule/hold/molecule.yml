@@ -54,8 +54,6 @@ provisioner:
           mongodb_replicaset_name: test
           mongodb_firewall_state: started
           mongodb_packages:
-            - ca-certificates
-            - ufw
             - mongodb-org
             - mongodb-mongosh
 verifier:
