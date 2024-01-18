@@ -1,18 +1,25 @@
 ---
 - name: Manage MongoDB existing member hosts
   ansible.builtin.set_fact:
-    _mongodb_existing_host: "{{ true if _existing_host_filter else false }}"
-    _mongodb_add_members: "{{ _add_members_list }}"
-    _mongodb_delete_members: "{{ _delete_members_list }}"
+    _mongodb_add_members: "{{ _add_members }}"
+    _mongodb_delete_members: "{{ _delete_members }}"
   vars:
-    _existing_list: "{{ _existing_members | default([]) }}"
-    _existing_hosts: "{{ _existing_list | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
-    _existing_host_filter: "{{ _existing_hosts | select('equalto', ansible_default_ipv4.address) }}"
-    _add_members_list: "{{ mongodb_replicaset_members | reject('in', _existing_list) }}"
-    _delete_members_list: "{{ _existing_list | reject('in', mongodb_replicaset_members) }}"
+    _inventory_attr: ['ansible_default_ipv4', 'address']
+    _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
+    _existing_inventory: "{{ _existing_hosts | select('in', hostvars.values()) }}"
+    _existing_addrs: "{{ _existing_inventory | map('hostvars', _inventory_attr) | list }}"
+    _existing_members: "{{ _existing_hosts + _existing_addrs }}"
+    _add_members: "{{ mongodb_replicaset_members | reject('in', _existing_members) }}"
+    _target_hosts: "{{ mongodb_replicaset_members }}"
+    _target_inventory: "{{ _target_hosts | select('in', hostvars.values()) }}"
+    _target_addrs: "{{ _target_inventory | map('hostvars', _inventory_attr) | list }}"
+    _target_members: "{{ _target_hosts + _target_addrs }}"
+    _delete_hosts: "{{ _existing_hosts | reject('in', _target_members) }}"
 
 - name: Initialize MongoDB replicaset
-  when: not _mongodb_existing_host
+  when:
+    - _existing_members | length == 0
+    - mongodb_replicaset_init
   run_once: true
   block:
     - name: Create MongoDB replica set
@@ -33,7 +40,9 @@
       until: mongodb_rs is success
 
 - name: Manage MongoDB replicaset members
-  when: _mongodb_existing_host
+  when:
+    - _existing_members | length > 0
+    - mongodb_replicaset_update
   block:
     - name: Gather replica set primary member
       community.mongodb.mongodb_shell:
