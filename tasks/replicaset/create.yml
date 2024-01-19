@@ -4,9 +4,15 @@
     _existing_members: []
   when: _existing_members is not defined
 
+- name: Debug target members
+  ansible.builtin.debug:
+    msg: "Target members are [{{ mongodb_replicaset_members | join(',') }}]"
+  run_once: true
+
 - name: Debug cluster facts
   ansible.builtin.debug:
     msg: "Detected cluster members [{{ _existing_members | join(',') }}]"
+  run_once: true
 
 - name: Manage MongoDB existing member hosts
   ansible.builtin.set_fact:
@@ -17,13 +23,26 @@
     _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _existing_inventory: "{{ _existing_hosts | select('in', hostvars.values()) }}"
     _existing_addrs: "{{ _existing_inventory | map('extract', hostvars, _inventory_attr) | list }}"
-    _existing_hostaddrs: "{{ _existing_hosts + _existing_addrs }}"
+    _existing_iphosts: "{{ _existing_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+    _existing_hostaddrs: "{{ _existing_members + _existing_iphosts }}"
     _add_members: "{{ mongodb_replicaset_members | reject('in', _existing_hostaddrs) }}"
-    _target_hosts: "{{ mongodb_replicaset_members }}"
+    _target_members: "{{ mongodb_replicaset_members }}"
+    _target_hosts: "{{ _target_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _target_inventory: "{{ _target_hosts | select('in', hostvars.values()) }}"
     _target_addrs: "{{ _target_inventory | map('extract', hostvars, _inventory_attr) | list }}"
-    _target_hostaddrs: "{{ _target_hosts + _target_addrs }}"
-    _delete_members: "{{ _existing_hosts | reject('in', _target_hostaddrs) }}"
+    _target_ipaddrs: "{{ _target_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list}}"
+    _target_hostaddrs: "{{ _target_members + _target_ipaddrs }}"
+    _delete_members: "{{ _existing_members | reject('in', _target_hostaddrs) }}"
+
+- name: Debug desired cluster state
+  ansible.builtin.debug:
+    msg: "Adding cluster members [{{ _mongodb_add_members | join(',') }}]"
+  run_once: true
+
+- name: Debug desired cluster state
+  ansible.builtin.debug:
+    msg: "Removing cluster members [{{ _mongodb_delete_members | join(',') }}]"
+  run_once: true
 
 - name: Initialize MongoDB replicaset
   when:
@@ -104,7 +123,7 @@
       delegate_to: "{{ replicaset_primary }}"
       when: replicaset_primary
 
-- name: Set slave ok for replica set
+- name: Allow read operations on secondary replicaset members
   community.mongodb.mongodb_shell:
     eval: "rs.secondaryOk()"
   changed_when: false
