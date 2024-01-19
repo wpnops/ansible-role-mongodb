@@ -21,12 +21,6 @@ Role depends on filters defined in [nephelaiio.plugins](https://github.com/nephe
      - role: wpnops.mongodb
 ```
 
-## ToDo
-* Add molecule scenario to ensure replicaset stability when changing between ip and hostname membership
-* Add molecule scenario to add replicaset member
-* Add molecule scenario to remove replicaset member
-* Add molecule scenario to replace replicaset member
-
 ## Testing
 
 Please make sure your environment has [docker](https://www.docker.com) installed in order to run role validation tests. Additional python dependencies are listed in the [requirements file](https://github.com/nephelaiio/ansible-role-requirements/blob/master/requirements.txt)

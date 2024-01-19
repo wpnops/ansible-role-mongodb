@@ -45,6 +45,7 @@ provisioner:
   playbooks:
     prepare: ../common/prepare.yml
     converge: ../common/converge.yml
+    side_effect: ../common/converge.yml
     verify: ../common/verify.yml
   config_options:
     defaults:

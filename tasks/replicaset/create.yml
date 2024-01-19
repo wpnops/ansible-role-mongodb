@@ -23,7 +23,7 @@
     _target_inventory: "{{ _target_hosts | select('in', hostvars.values()) }}"
     _target_addrs: "{{ _target_inventory | map('extract', hostvars, _inventory_attr) | list }}"
     _target_hostaddrs: "{{ _target_hosts + _target_addrs }}"
-    _delete_hosts: "{{ _existing_hosts | reject('in', _target_hostaddrs) }}"
+    _delete_members: "{{ _existing_hosts | reject('in', _target_hostaddrs) }}"
 
 - name: Initialize MongoDB replicaset
   when:
