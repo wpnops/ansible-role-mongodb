@@ -31,7 +31,7 @@ mongodb_storage_oplogminhours: 72
 mongodb_replicaset_name: rs0
 mongodb_members: []
 mongodb_replicaset_init: true
-mongodb_replicaset_update: false
+mongodb_replicaset_update: true
 mongodb_replicaset_members: []
 mongodb_src_addresses_list: []
 mongodb_sharding_role: ''
