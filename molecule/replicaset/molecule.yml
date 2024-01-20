@@ -101,3 +101,12 @@ provisioner:
           mongodb_sharding_role: shardsvr
 verifier:
   name: ansible
+scenario:
+  prepare_sequence:
+    - prepare
+  converge_sequence:
+    - converge
+  destroy_sequence:
+    - destroy
+  cleanup_sequence:
+    - cleanup

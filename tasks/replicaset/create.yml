@@ -20,7 +20,8 @@
     _mongodb_delete_members: "{{ _delete_members }}"
   vars:
     _addr_attrs: ['ansible_default_ipv4', 'address']
-    _revvars: "{{ hostvars.values() | nephelaiio.plugins.list_to_dict(_addr_attrs, False) }}"
+    _hostvars: "{{ ansible_play_hosts | map('extract', hostvars) }}"
+    _revvars: "{{ _hostvars | nephelaiio.plugins.list_to_dict(_addr_attrs, False) }}"
     _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _existing_inventory: "{{ _existing_hosts | select('in', hostvars) }}"
     _existing_addrs: "{{ _existing_inventory | map('extract', hostvars, _addr_attrs) }}"

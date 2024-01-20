@@ -11,7 +11,7 @@ Please refer to the [defaults file](/defaults/main.yml) for an up to date list o
 
 ## Dependencies
 
-Role depends on filters defined in [nephelaiio.plugins](https://github.com/nephelaiio/ansible-collection-plugins).
+Role depends on filters defined in collection [nephelaiio.plugins](https://github.com/nephelaiio/ansible-collection-plugins).
 
 ## Example Playbook
 
