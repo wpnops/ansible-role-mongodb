@@ -1,5 +1,5 @@
 ---
-- name: Initialize cluster facts
+- name: Initialize cluster defaults
   ansible.builtin.set_fact:
     _existing_members: []
   when: _existing_members is not defined
@@ -14,37 +14,48 @@
     msg: "Detected cluster members [{{ _existing_members | join(',') }}]"
   run_once: true
 
-- name: Manage MongoDB existing member hosts
+- name: Initialize cluster facts
+  ansible.builtin.set_fact:
+    _addr_attrs: "{{ __addr_attrs }}"
+    _hostvars: "{{ __hostvars }}"
+    _revvars: "{{ __revvars }}"
+  vars:
+    __addr_attrs: ['ansible_default_ipv4', 'address']
+    __hostvars: "{{ ansible_play_hosts | map('extract', hostvars) }}"
+    __revvars: "{{ __hostvars | nephelaiio.plugins.list_to_dict(__addr_attrs, False) }}"
+
+- name: Detect new cluster members
   ansible.builtin.set_fact:
     _mongodb_add_members: "{{ _add_members }}"
-    _mongodb_delete_members: "{{ _delete_members }}"
   vars:
-    _addr_attrs: ['ansible_default_ipv4', 'address']
-    _hostvars: "{{ ansible_play_hosts | map('extract', hostvars) }}"
-    _revvars: "{{ _hostvars | nephelaiio.plugins.list_to_dict(_addr_attrs, False) }}"
     _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _existing_inventory: "{{ _existing_hosts | select('in', hostvars) }}"
     _existing_addrs: "{{ _existing_inventory | map('extract', hostvars, _addr_attrs) }}"
     _existing_iphosts: "{{ _existing_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
     _existing_hostaddrs: "{{ _existing_members + _existing_iphosts }}"
     _add_members: "{{ mongodb_replicaset_members | reject('in', _existing_hostaddrs) }}"
+
+- name: Debug new cluster members
+  ansible.builtin.debug:
+    msg: "Adding cluster members [{{ _mongodb_add_members | join(',') }}]"
+  run_once: true
+
+- name: Detect stale cluster hosts
+  ansible.builtin.set_fact:
+    _mongodb_delete_members: "{{ _delete_members }}"
+  vars:
     _target_members: "{{ mongodb_replicaset_members }}"
     _target_hosts: "{{ _target_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
     _target_inventory: "{{ _target_hosts | select('in', hostvars.values()) }}"
     _target_addrs: "{{ _target_inventory | map('extract', hostvars, _addr_attrs) }}"
     _target_iphosts: "{{ _target_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
     _target_revaddrs: "{{ _target_iphosts | select('in', _revvars) }}"
-    _target_revnames: "{{ _target_hosts | map('extract', _revvars, 'inventory_hostname') }}"
+    _target_revnames: "{{ _target_revaddrs | map('extract', _revvars, 'inventory_hostname') }}"
     _target_revhosts: "{{ _target_revnames | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
     _target_hostaddrs: "{{ _target_members + _target_iphosts + _target_revhosts }}"
     _delete_members: "{{ _existing_members | reject('in', _target_hostaddrs) }}"
 
-- name: Debug desired cluster state
-  ansible.builtin.debug:
-    msg: "Adding cluster members [{{ _mongodb_add_members | join(',') }}]"
-  run_once: true
-
-- name: Debug desired cluster state
+- name: Debug stale cluster members
   ansible.builtin.debug:
     msg: "Removing cluster members [{{ _mongodb_delete_members | join(',') }}]"
   run_once: true
