@@ -2,11 +2,6 @@
 - name: Configure 3 replicaset nodes
   hosts: "{{ groups['all'][:3] | join(':') }}"
   tasks:
-    - name: Destroy mongodb configuration
-      ansible.builtin.file:
-        dest: /etc/mongod.conf
-        state: absent
-
     - name: Deploy mongodb
       ansible.builtin.include_role:
         name: wpnops.mongodb
