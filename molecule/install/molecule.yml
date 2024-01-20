@@ -7,7 +7,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: mongodb1
+  - name: mongodb-install-01
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
@@ -18,7 +18,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb2
+  - name: mongodb-install-02
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
@@ -29,7 +29,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb3
+  - name: mongodb-install-03
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
