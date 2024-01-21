@@ -18,12 +18,18 @@
 
     - name: Initialize hostvar facts
       ansible.builtin.set_fact:
-        _addr_attrs: ['ansible_default_ipv4', 'address']
-        _hostvars: "{{ ansible_play_hosts | map('extract', hostvars) }}"
+        _addr_attrs: "{{ __addr_attrs }}"
+        _addr_vars: "{{ _iface_vars | selectattr(__addr_attrs[0], 'defined') | map('nephelaiio.plugins.map_flatten') }}"
+      vars:
+        __addr_attrs: ['ansible_default_ipv4', 'address']
+        __inventory_attrs: "{{ [__addr_attrs[0], 'inventory_hostname'] }}"
+        _iface_vars: "{{ hostvars.values() | map('nephelaiio.plugins.select_attributes', __inventory_attrs) }}"
 
-    - name: Initialize reverse hostvar facts
+    - name: Build address fact dictionary
       ansible.builtin.set_fact:
-        _revvars: "{{ _hostvars | nephelaiio.plugins.list_to_dict(_addr_attrs, False) }}"
+        _revvars: "{{ _addr_vars | nephelaiio.plugins.list_to_dict(_addr_dotattr) }}"
+      vars:
+        _addr_dotattr: "{{ '.'.join(_addr_attrs) }}"
 
     - name: Detect new cluster members
       ansible.builtin.set_fact:
