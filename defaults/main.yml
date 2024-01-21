@@ -38,3 +38,5 @@ mongodb_sharding_role: ''
 mongodb_firewall_state: started
 mongodb_reconfig_interval: 60
 mongodb_reconfig_poll: 10
+mongodb_install_retries: 3
+mongodb_install_delay: 60
