@@ -123,6 +123,8 @@
     - name: Install MongoDB packages
       ansible.builtin.package:
         name: "{{ _mongodb_packages }}"
+      retries: "{{ mongodb_install_retries }}"
+      delay: "{{ mongodb_install_delay }}"
 
   always:
     - name: Configure package holds
