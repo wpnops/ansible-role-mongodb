@@ -12,6 +12,12 @@
   hosts: all
   become: true
   tasks:
+    - name: Update apt repos
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+      changed_when: false
+
     - name: Configure mongodb repository
       ansible.builtin.include_role:
         name: nephelaiio.mongodb_repo
