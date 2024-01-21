@@ -40,7 +40,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb4
+  - name: mongodb-replicaset-04
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
@@ -51,7 +51,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb5
+  - name: mongodb-replicaset-05
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
@@ -62,7 +62,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb6
+  - name: mongodb-replicaset-06
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
@@ -73,7 +73,7 @@ platforms:
     tmpfs:
       - /tmp
       - /opt
-  - name: mongodb7
+  - name: mongodb-replicaset-07
     image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
