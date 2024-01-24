@@ -100,6 +100,7 @@
           retries: "{{ mongodb_query_retries }}"
           delay: "{{ mongodb_query_delay }}"
           register: mongodb_rs
+          until: mongodb_rs is success
           changed_when: false
 
         - name: Determine MongoDB replicaset primary
