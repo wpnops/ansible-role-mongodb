@@ -40,3 +40,7 @@ mongodb_reconfig_interval: 60
 mongodb_reconfig_poll: 10
 mongodb_install_retries: 3
 mongodb_install_delay: 60
+mongodb_converge_retries: 3
+mongodb_converge_delay: 60
+mongodb_query_retries: 6
+mongodb_query_delay: 10
