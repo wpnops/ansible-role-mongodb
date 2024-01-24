@@ -39,6 +39,8 @@
         interval: "{{ mongodb_reconfig_interval }}"
       retries: "{{ mongodb_converge_retries }}"
       delay: "{{ mongodb_converge_delay }}"
+      register: mongodb_status
+      until: mongodb_status is success
       changed_when: false
 
 - name: Query existing MongoDB replica set members
@@ -47,6 +49,7 @@
   retries: "{{ mongodb_query_retries }}"
   delay: "{{ mongodb_query_delay }}"
   register: mongodb_status
+  until: mongodb_status is success
   delegate_to: "{{ replicaset_primary }}"
   changed_when: false
 
