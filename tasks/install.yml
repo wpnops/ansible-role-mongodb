@@ -96,10 +96,9 @@
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
-              retries: 6
-              delay: 10
+              retries: "{{ mongodb_query_retries }}"
+              delay: "{{ mongodb_query_delay }}"
               register: mongodb_status
-              until: mongodb_status is success
               changed_when: false
               run_once: true
 
