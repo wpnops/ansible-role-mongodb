@@ -17,6 +17,10 @@
         validate: minimal
         poll: "{{ mongodb_reconfig_poll }}"
         interval: "{{ mongodb_reconfig_interval }}"
+      retries: "{{ mongodb_converge_retries }}"
+      delay: "{{ mongodb_converge_delay }}"
+      register: mongodb_status
+      until: mongodb_status is success
 
     - name: Reconfigure MongoDB replica set
       community.mongodb.mongodb_replicaset:
