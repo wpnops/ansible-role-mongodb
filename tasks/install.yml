@@ -99,7 +99,7 @@
               retries: "{{ mongodb_query_retries }}"
               delay: "{{ mongodb_query_delay }}"
               register: mongodb_status
-              until: mongodb_status is success
+              until: mongodb_status is succeeded
               changed_when: false
               run_once: true
 
@@ -125,6 +125,8 @@
         name: "{{ _mongodb_packages }}"
       retries: "{{ mongodb_install_retries }}"
       delay: "{{ mongodb_install_delay }}"
+      register: mongodb_install
+      until: mongodb_install is succeeded
 
   always:
     - name: Configure package holds
