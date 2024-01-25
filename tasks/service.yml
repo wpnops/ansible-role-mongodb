@@ -17,6 +17,6 @@
       retries: "{{ mongodb_converge_retries }}"
       delay: "{{ mongodb_converge_delay }}"
       register: mongodb_status
-      until: mongodb_status is success
+      until: mongodb_status is succeeded
       when: mongodb_service_state != "stopped"
       changed_when: false

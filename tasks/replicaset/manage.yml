@@ -92,7 +92,7 @@
           retries: "{{ mongodb_converge_retries }}"
           delay: "{{ mongodb_converge_delay }}"
           register: mongodb_rs
-          until: mongodb_rs is success
+          until: mongodb_rs is succeeded
 
     - name: Manage MongoDB replicaset members
       when:
@@ -105,7 +105,7 @@
           retries: "{{ mongodb_query_retries }}"
           delay: "{{ mongodb_query_delay }}"
           register: mongodb_rs
-          until: mongodb_rs is success
+          until: mongodb_rs is succeeded
           changed_when: false
 
         - name: Determine MongoDB replicaset primary
@@ -150,7 +150,7 @@
           retries: "{{ mongodb_converge_retries }}"
           delay: "{{ mongodb_converge_delay }}"
           register: mongodb_status
-          until: mongodb_status is success
+          until: mongodb_status is succeeded
           delegate_to: "{{ replicaset_primary }}"
           when: replicaset_primary
 

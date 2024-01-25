@@ -20,7 +20,7 @@
       retries: "{{ mongodb_converge_retries }}"
       delay: "{{ mongodb_converge_delay }}"
       register: mongodb_status
-      until: mongodb_status is success
+      until: mongodb_status is succeeded
 
     - name: Reconfigure MongoDB replica set
       community.mongodb.mongodb_replicaset:
@@ -44,7 +44,7 @@
       retries: "{{ mongodb_converge_retries }}"
       delay: "{{ mongodb_converge_delay }}"
       register: mongodb_status
-      until: mongodb_status is success
+      until: mongodb_status is succeeded
       changed_when: false
 
 - name: Query existing MongoDB replica set members
@@ -53,7 +53,7 @@
   retries: "{{ mongodb_query_retries }}"
   delay: "{{ mongodb_query_delay }}"
   register: mongodb_status
-  until: mongodb_status is success
+  until: mongodb_status is succeeded
   delegate_to: "{{ replicaset_primary }}"
   changed_when: false
 
