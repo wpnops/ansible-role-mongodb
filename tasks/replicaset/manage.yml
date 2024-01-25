@@ -16,33 +16,26 @@
       ansible.builtin.debug:
         msg: "Detected cluster members [{{ _existing_members | join(',') }}]"
 
-    - name: Initialize hostvar facts
-      ansible.builtin.set_fact:
-        _addr_attrs: "{{ __addr_attrs }}"
-        _addr_vars: "{{ _iface_vars | selectattr(__addr_attrs[0], 'defined') | map('nephelaiio.plugins.map_flatten') }}"
-      vars:
-        __addr_attrs: ['ansible_default_ipv4', 'address']
-        __inventory_attrs: "{{ [__addr_attrs[0], 'inventory_hostname'] }}"
-        _iface_vars: "{{ hostvars.values() | map('nephelaiio.plugins.select_attributes', __inventory_attrs) }}"
-
     - name: Build address fact dictionary
       ansible.builtin.set_fact:
-        _revvars: "{{ _addr_vars | nephelaiio.plugins.list_to_dict(_addr_dotattr) }}"
+        _revaddrs: "{{ _host_addrs | zip(_hosts) | community.general.dict }}"
+        _fwdaddrs: "{{ _hosts | zip(_host_addrs) | community.general.dict }}"
       vars:
-        _addr_dotattr: "{{ '.'.join(_addr_attrs) }}"
+        _hosts: "{{ ansible_play_hosts }}"
+        _host_addrs: "{{ _hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
 
     - name: Detect new cluster members
       ansible.builtin.set_fact:
         _mongodb_add_members: "{{ _add_members }}"
       vars:
         _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
-        _existing_inventory: "{{ _existing_hosts | select('in', hostvars) }}"
-        _existing_inventory_addrs: "{{ _existing_inventory | map('extract', hostvars, _addr_attrs) }}"
+        _existing_inventory: "{{ _existing_hosts | select('in', _fwdaddrs) }}"
+        _existing_inventory_addrs: "{{ _existing_inventory | map('extract', _fwdaddrs) }}"
         _existing_host_addrs: "{{ _existing_hosts | ansible.utils.ipaddr }}"
         _existing_addrs: "{{ _existing_inventory_addrs + _existing_host_addrs }}"
         _existing_iphosts: "{{ _existing_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
-        _existing_revaddrs: "{{ _existing_addrs | select('in', _revvars) }}"
-        _existing_revnames: "{{ _existing_revaddrs | map('extract', _revvars, 'inventory_hostname') }}"
+        _existing_revaddrs: "{{ _existing_addrs | select('in', _revaddrs) }}"
+        _existing_revnames: "{{ _existing_revaddrs | map('extract', _revaddrs) }}"
         _existing_revhosts: "{{ _existing_revnames | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
         _existing_hostaddrs: "{{ _existing_members + _existing_iphosts + _existing_revhosts }}"
         _add_members: "{{ mongodb_replicaset_members | reject('in', _existing_hostaddrs) }}"
@@ -57,13 +50,13 @@
       vars:
         _target_members: "{{ mongodb_replicaset_members }}"
         _target_hosts: "{{ _target_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
-        _target_inventory: "{{ _target_hosts | select('in', hostvars) }}"
-        _target_inventory_addrs: "{{ _target_inventory | map('extract', hostvars, _addr_attrs) }}"
+        _target_inventory: "{{ _target_hosts | select('in', _fwdaddrs) }}"
+        _target_inventory_addrs: "{{ _target_inventory | map('extract', _fwdaddrs) }}"
         _target_host_addrs: "{{ _target_hosts | ansible.utils.ipaddr }}"
         _target_addrs: "{{ _target_inventory_addrs + _target_host_addrs }}"
         _target_iphosts: "{{ _target_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
-        _target_revaddrs: "{{ _target_addrs | select('in', _revvars) }}"
-        _target_revnames: "{{ _target_revaddrs | map('extract', _revvars, 'inventory_hostname') }}"
+        _target_revaddrs: "{{ _target_addrs | select('in', _revaddrs) }}"
+        _target_revnames: "{{ _target_revaddrs | map('extract', _revaddrs) }}"
         _target_revhosts: "{{ _target_revnames | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
         _target_hostaddrs: "{{ _target_members + _target_iphosts + _target_revhosts }}"
         _delete_members: "{{ _existing_members | reject('in', _target_hostaddrs) }}"
