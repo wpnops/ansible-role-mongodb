@@ -92,7 +92,7 @@
         - name: Retrieve MongoDB existing replicaset members
           when: mongodb_replicaset_name | default('') != ''
           block:
-            - name: Gather MongoDB existing replica set members
+            - name: Gather MongoDB existing replicaset members
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
@@ -103,7 +103,7 @@
               changed_when: false
               run_once: true
 
-            - name: Compute MongoDB existing replica set members
+            - name: Compute MongoDB existing replicaset members
               ansible.builtin.set_fact:
                 _existing_members: "{{ _members_list | map(attribute='name') }}"
               vars:
