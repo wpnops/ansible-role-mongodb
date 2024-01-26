@@ -64,10 +64,16 @@
       ansible.builtin.debug:
         msg: "Removing cluster members [{{ _mongodb_delete_members | join(',') }}]"
 
+    - name: Set cluster init state
+      ansible.builtin.set_fact:
+        _replicaset_initialized: "{{ _all_members | flatten | length > 0 }}"
+      vars:
+        _all_members: "{{ ansible_play_hosts | map('extract', hostvars, '_existing_members') }}"
+
     - name: Initialize MongoDB replicaset
       run_once: true
       when:
-        - _existing_members | length == 0
+        - not _replicaset_initialized
         - mongodb_replicaset_init
       block:
         - name: Create MongoDB replicaset
@@ -102,7 +108,7 @@
 
     - name: Manage MongoDB replicaset members
       when:
-        - _existing_members | length > 0
+        - _replicaset_initialized
         - (_mongodb_add_members + _mongodb_delete_members) | length > 0
         - replicaset_primary | bool
         - mongodb_replicaset_update | bool
@@ -123,4 +129,5 @@
       community.mongodb.mongodb_shell:
         eval: "rs.secondaryOk()"
       changed_when: false
+      run_once: true
       when: replicaset_primary

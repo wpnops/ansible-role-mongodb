@@ -16,7 +16,7 @@
   vars:
     _map_format: 'nephelaiio.plugins.map_format'
     _format_existing: '{"host": "%s"}'
-    _members_list: "{{ mongodb_status.transformed_output | list }}"
+    _members_list: "{{ mongodb_status.transformed_output | map(attribute='name') | list }}"
 
 - name: Add new member to MongoDB replicaset
   community.mongodb.mongodb_replicaset:

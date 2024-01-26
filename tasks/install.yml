@@ -100,6 +100,7 @@
               delay: "{{ mongodb_query_delay }}"
               register: mongodb_status
               until: mongodb_status is succeeded
+              ignore_errors: true
               changed_when: false
               run_once: true
 
@@ -108,6 +109,7 @@
                 _existing_members: "{{ _members_list | map(attribute='name') }}"
               vars:
                 _members_list: "{{ mongodb_status.transformed_output | list }}"
+              when: mongodb_status is succeeded
 
 - name: Release package holds
   ansible.builtin.include_tasks: lock.yml
