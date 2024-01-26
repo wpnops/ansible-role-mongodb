@@ -92,7 +92,7 @@
         - name: Retrieve MongoDB existing replicaset members
           when: mongodb_replicaset_name | default('') != ''
           block:
-            - name: Gather MongoDB existing replicaset members
+            - name: Gather existing MongoDB replicaset members
               community.mongodb.mongodb_shell:
                 eval: "rs.status().members"
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
