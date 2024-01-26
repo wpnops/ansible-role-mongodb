@@ -1,5 +1,5 @@
 ---
-- name: Rename replica set
+- name: Rename replicaset
   hosts: all
   tasks:
     - name: Set base facts
