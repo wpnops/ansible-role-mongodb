@@ -1,11 +1,25 @@
 ---
 - name: Manage replicaset
+  when: mongodb_replicaset_name | default('') != ''
   block:
+    - name: Query MongoDB replicaset members
+      community.mongodb.mongodb_shell:
+        eval: "rs.status().members"
+        mongo_cmd: "{{ mongodb_shell | default(omit) }}"
+      retries: "{{ mongodb_query_retries }}"
+      delay: "{{ mongodb_query_delay }}"
+      register: mongodb_status
+      until: mongodb_status is succeeded
+      ignore_errors: true
+      changed_when: false
+      run_once: true
 
-    - name: Initialize cluster defaults
+    - name: Set MongoDB member facts
       ansible.builtin.set_fact:
-        _existing_members: []
-      when: _existing_members is not defined
+        _existing_members: "{{ [] if mongodb_status is failed else _member_names }}"
+      vars:
+        _member_list: "{{ mongodb_status.transformed_output | list }}"
+        _member_names: "{{ _member_list | map(attribute='name')  }}"
 
     - name: Debug target members
       ansible.builtin.debug:
@@ -19,6 +33,8 @@
       ansible.builtin.set_fact:
         _revaddrs: "{{ _host_addrs | zip(_hosts) | community.general.dict }}"
         _fwdaddrs: "{{ _hosts | zip(_host_addrs) | community.general.dict }}"
+        _map_format: 'nephelaiio.plugins.map_format'
+        _split_with: 'nephelaiio.plugins.split_with'
       vars:
         _hosts: "{{ ansible_play_hosts }}"
         _host_addrs: "{{ _hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
@@ -27,15 +43,15 @@
       ansible.builtin.set_fact:
         _mongodb_add_members: "{{ _add_members }}"
       vars:
-        _existing_hosts: "{{ _existing_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
+        _existing_hosts: "{{ _existing_members | map(_split_with, ':') | map('first') }}"
         _existing_inventory: "{{ _existing_hosts | select('in', _fwdaddrs) }}"
         _existing_inventory_addrs: "{{ _existing_inventory | map('extract', _fwdaddrs) }}"
         _existing_host_addrs: "{{ _existing_hosts | ansible.utils.ipaddr }}"
         _existing_addrs: "{{ _existing_inventory_addrs + _existing_host_addrs }}"
-        _existing_iphosts: "{{ _existing_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
+        _existing_iphosts: "{{ _existing_addrs | map(_map_format, '%s:' + mongodb_port) }}"
         _existing_revaddrs: "{{ _existing_addrs | select('in', _revaddrs) }}"
         _existing_revnames: "{{ _existing_revaddrs | map('extract', _revaddrs) }}"
-        _existing_revhosts: "{{ _existing_revnames | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
+        _existing_revhosts: "{{ _existing_revnames | map(_map_format, '%s:' + mongodb_port) }}"
         _existing_hostaddrs: "{{ _existing_members + _existing_iphosts + _existing_revhosts }}"
         _add_members: "{{ mongodb_replicaset_members | reject('in', _existing_hostaddrs) }}"
 
@@ -48,15 +64,15 @@
         _mongodb_delete_members: "{{ _delete_members }}"
       vars:
         _target_members: "{{ mongodb_replicaset_members }}"
-        _target_hosts: "{{ _target_members | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
+        _target_hosts: "{{ _target_members | map(_split_with, ':') | map('first') }}"
         _target_inventory: "{{ _target_hosts | select('in', _fwdaddrs) }}"
         _target_inventory_addrs: "{{ _target_inventory | map('extract', _fwdaddrs) }}"
         _target_host_addrs: "{{ _target_hosts | ansible.utils.ipaddr }}"
         _target_addrs: "{{ _target_inventory_addrs + _target_host_addrs }}"
-        _target_iphosts: "{{ _target_addrs | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
+        _target_iphosts: "{{ _target_addrs | map(_map_format, '%s:' + mongodb_port) }}"
         _target_revaddrs: "{{ _target_addrs | select('in', _revaddrs) }}"
         _target_revnames: "{{ _target_revaddrs | map('extract', _revaddrs) }}"
-        _target_revhosts: "{{ _target_revnames | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) }}"
+        _target_revhosts: "{{ _target_revnames | map(_map_format, '%s:' + mongodb_port) }}"
         _target_hostaddrs: "{{ _target_members + _target_iphosts + _target_revhosts }}"
         _delete_members: "{{ _existing_members | reject('in', _target_hostaddrs) }}"
 
