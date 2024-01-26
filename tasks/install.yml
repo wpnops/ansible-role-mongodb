@@ -89,28 +89,6 @@
             - _role in _mongodb_config[_sharding]
             - _mongodb_config[_sharding][_role] != mongodb_sharding_role
 
-        - name: Retrieve MongoDB existing replicaset members
-          when: mongodb_replicaset_name | default('') != ''
-          block:
-            - name: Gather existing MongoDB replicaset members
-              community.mongodb.mongodb_shell:
-                eval: "rs.status().members"
-                mongo_cmd: "{{ mongodb_shell | default(omit) }}"
-              retries: "{{ mongodb_query_retries }}"
-              delay: "{{ mongodb_query_delay }}"
-              register: mongodb_status
-              until: mongodb_status is succeeded
-              ignore_errors: true
-              changed_when: false
-              run_once: true
-
-            - name: Compute MongoDB existing replicaset members
-              ansible.builtin.set_fact:
-                _existing_members: "{{ _members_list | map(attribute='name') }}"
-              vars:
-                _members_list: "{{ mongodb_status.transformed_output | list }}"
-              when: mongodb_status is succeeded
-
 - name: Release package holds
   ansible.builtin.include_tasks: lock.yml
   vars:
