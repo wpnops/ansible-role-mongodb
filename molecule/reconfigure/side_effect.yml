@@ -28,7 +28,7 @@
 
     - name: Attempt replicaset rename operation
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -86,7 +86,7 @@
 
     - name: Attempt sharding role change
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -143,7 +143,7 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:

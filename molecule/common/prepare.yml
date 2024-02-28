@@ -30,6 +30,6 @@
       ansible.builtin.package:
         name: virtualenv
 
-    - name: Configure mongodb repository
+    - name: Configure MongoDB repository
       ansible.builtin.include_role:
         name: nephelaiio.mongodb_repo

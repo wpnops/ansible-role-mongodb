@@ -110,10 +110,10 @@
       vars:
         _lock_state: hold
 
-- name: Configure mongodb
+- name: Configure MongoDB
   tags: configure
   block:
-    - name: Configure mongodb
+    - name: Configure MongoDB
       ansible.builtin.template:
         src: mongodb.conf.j2
         dest: "{{ mongodb_config_path }}"
@@ -148,7 +148,7 @@
                 proto: any
                 rule: allow
 
-            - name: Compute mongodb address block
+            - name: Compute MongoDB address block
               ansible.builtin.set_fact:
                 _mongodb_addresses_list: "{{ _addr_list + [_default_address] | list | unique }}"
               vars:
@@ -157,7 +157,7 @@
                 _prefix: "{{ ansible_default_ipv4.prefix }}"
                 _default_address: "{{ _network }}/{{ _prefix }}"
 
-            - name: Configure mongodb firewall access
+            - name: Configure MongoDB firewall access
               community.general.ufw:
                 state: enabled
                 from: "{{ item }}"

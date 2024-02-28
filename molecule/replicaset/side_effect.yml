@@ -20,9 +20,9 @@
       ansible.builtin.set_fact:
         ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Deploy mongodb
+    - name: Deploy MongoDB
       block:
-        - name: Include mongodb role
+        - name: Include MongoDB role
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -65,9 +65,9 @@
       ansible.builtin.set_fact:
         ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Deploy mongodb
+    - name: Deploy MongoDB
       block:
-        - name: Include mongodb role
+        - name: Include MongoDB role
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -106,9 +106,9 @@
       ansible.builtin.set_fact:
         ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Deploy mongodb
+    - name: Deploy MongoDB
       block:
-        - name: Include mongodb role
+        - name: Include MongoDB role
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -153,7 +153,7 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -207,7 +207,7 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -262,7 +262,7 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
@@ -317,7 +317,7 @@
 
     - name: Attempt broken replicaset sharding configuration
       block:
-        - name: Deploy mongodb
+        - name: Deploy MongoDB
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:

@@ -1,55 +1,84 @@
 ---
-- name: Verify mongodb
+- name: Verify MongoDB
   hosts: all
   become: true
   vars:
     mongodb_test:
       name: "Test"
   tasks:
-    - name: Retrieve MongoDB replicaset status
-      community.mongodb.mongodb_status:
-        replica_set: "{{ mongodb_replicaset_name }}"
-        validate: minimal
-        poll: 5
-        interval: 10
-      register: mongodb_rs
-      run_once: true
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: .virtualenv
+        path: "~"
+      register: _virtualenv_tmpdir
+      changed_when: false
 
-    - name: Determine MongoDB replicaset primary
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        name:
+          - pymongo
+          - python-gnupg
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
+
+    - name: Change python interpreter
       ansible.builtin.set_fact:
-        replicaset_primary: "{{ ansible_fqdn if _replicaset_primary == ansible_default_ipv4.address }}"
-      vars:
-        _mongodb_replicaset: "{{ mongodb_rs.replicaset | dict2items }}"
-        _replicaset_primary_dict: "{{ _mongodb_replicaset | selectattr('value', 'equalto', 'PRIMARY') }}"
-        _replicaset_primary_list: "{{ _replicaset_primary_dict | map(attribute='key') | map('nephelaiio.plugins.split_with', ':') | map('first') }}"
-        _replicaset_primary: "{{ _replicaset_primary_list | flatten | first }}"
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Evaluate MongoDB shell commands
-      when: replicaset_primary
+    - name: Verify MongoDB installation
       block:
-        - name: Create MongoDB test database
-          community.mongodb.mongodb_shell:
-            login_database: "testdb"
-            eval: "db.test.insert({{ mongodb_test }})"
-          register: mongodb_shell_output
+        - name: Retrieve MongoDB replicaset status
+          community.mongodb.mongodb_status:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            validate: minimal
+            poll: 5
+            interval: 10
+          register: mongodb_rs
+          run_once: true
 
-        - name: List MongoDB databases
-          community.mongodb.mongodb_shell:
-            eval: "db.adminCommand('listDatabases')"
-            stringify: true
-          changed_when: false
-          register: mongodb_shell_output
+        - name: Determine MongoDB replicaset primary
+          ansible.builtin.set_fact:
+            replicaset_primary: "{{ ansible_fqdn if _primary_host == ansible_default_ipv4.address }}"
+          vars:
+            _split_with: 'nephelaiio.plugins.split_with'
+            _replicasets: "{{ mongodb_rs.replicaset | dict2items }}"
+            _primary_data: "{{ _replica_sets | selectattr('value', 'equalto', 'PRIMARY') }}"
+            _primary_list: "{{ _primary_data | map(attribute='key') | map(_split_with, ':') | map('first') }}"
+            _primary_host: "{{ _primary_list | flatten | first }}"
 
-        - name: Find MongoDB test database metadata
-          community.mongodb.mongodb_shell:
-            login_database: "testdb"
-            eval: "db.test.find({{ mongodb_test }}).toArray()"
-          failed_when: mongodb_shell_output.transformed_output | length == 0
-          changed_when: false
-          register: mongodb_shell_output
+        - name: Evaluate MongoDB shell commands
+          when: replicaset_primary
+          block:
+            - name: Create MongoDB test database
+              community.mongodb.mongodb_shell:
+                login_database: "testdb"
+                eval: "db.test.insert({{ mongodb_test }})"
+              register: mongodb_shell_output
 
-        - name: Drop MongoDB test database
-          community.mongodb.mongodb_shell:
-            login_database: "testdb"
-            eval: "db.dropDatabase()"
+            - name: List MongoDB databases
+              community.mongodb.mongodb_shell:
+                eval: "db.adminCommand('listDatabases')"
+                stringify: true
+              changed_when: false
+              register: mongodb_shell_output
+
+            - name: Find MongoDB test database metadata
+              community.mongodb.mongodb_shell:
+                login_database: "testdb"
+                eval: "db.test.find({{ mongodb_test }}).toArray()"
+              failed_when: mongodb_shell_output.transformed_output | length == 0
+              changed_when: false
+              register: mongodb_shell_output
+
+            - name: Drop MongoDB test database
+              community.mongodb.mongodb_shell:
+                login_database: "testdb"
+                eval: "db.dropDatabase()"
+              changed_when: false
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
           changed_when: false

@@ -20,9 +20,9 @@
       ansible.builtin.set_fact:
         ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Deploy mongodb
+    - name: Deploy MongoDB
       block:
-        - name: Include mongodb role
+        - name: Include MongoDB role
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:

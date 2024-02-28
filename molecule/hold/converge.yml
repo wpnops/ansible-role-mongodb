@@ -89,7 +89,7 @@
       loop: "{{ _mongodb_package_query }}"
       when: ansible_os_family == "RedHat"
 
-    - name: Deploy mongodb
+    - name: Deploy MongoDB
       block:
         - name: Include mongodb role
           ansible.builtin.include_role:
