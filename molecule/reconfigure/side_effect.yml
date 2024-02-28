@@ -9,12 +9,15 @@
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
-        suffix: virtualenv
+        prefix: .virtualenv
+        path: "~"
       register: _virtualenv_tmpdir
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
-        virtualenv: "{{ _virtualenv_path }}"
+        name:
+          - pymongo
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -26,10 +29,12 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
             mongodb_replicaset_name: edited
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -58,12 +63,15 @@
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
-        suffix: virtualenv
+        prefix: .virtualenv
+        path: "~"
       register: _virtualenv_tmpdir
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
-        virtualenv: "{{ _virtualenv_path }}"
+        name:
+          - pymongo
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -75,10 +83,11 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_sharding_role: configsvr
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts
@@ -107,12 +116,15 @@
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
-        suffix: virtualenv
+        prefix: .virtualenv
+        path: "~"
       register: _virtualenv_tmpdir
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
-        virtualenv: "{{ _virtualenv_path }}"
+        name:
+          - pymongo
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -124,10 +136,11 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            mongodb_sharding_role: error
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
 
       rescue:
         - name: Set result facts

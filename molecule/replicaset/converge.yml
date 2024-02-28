@@ -5,12 +5,15 @@
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
-        suffix: virtualenv
+        prefix: .virtualenv
+        path: "~"
       register: _virtualenv_tmpdir
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
-        virtualenv: "{{ _virtualenv_path }}"
+        name:
+          - pip
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -22,9 +25,11 @@
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
             _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
 
       always:
         - name: Destroy virtualenv
