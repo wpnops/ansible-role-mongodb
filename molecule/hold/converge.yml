@@ -76,6 +76,10 @@
         suffix: virtualenv
       register: _virtualenv_tmpdir
 
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        virtualenv: "{{ _virtualenv_path }}"
+
     - name: Change python interpreter
       ansible.builtin.set_fact:
         ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
