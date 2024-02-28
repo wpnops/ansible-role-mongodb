@@ -19,7 +19,7 @@
         _existing_members: "{{ [] if mongodb_status is failed else _member_names }}"
       vars:
         _member_list: "{{ mongodb_status.transformed_output | list }}"
-        _member_names: "{{ _member_list | map(attribute='name')  }}"
+        _member_names: "{{ _member_list | map(attribute='name') }}"
 
     - name: Debug target members
       ansible.builtin.debug:
