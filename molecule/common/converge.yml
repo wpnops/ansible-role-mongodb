@@ -2,10 +2,28 @@
 - name: Deploy MongoDB
   hosts: all
   tasks:
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        mongodb_members: "{{ mongodb_addresses | list }}"
-        mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+      block:
+        - name: Include mongodb role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            mongodb_members: "{{ mongodb_addresses | list }}"
+            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent

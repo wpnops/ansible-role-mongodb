@@ -6,6 +6,16 @@
       ansible.builtin.set_fact:
         _rename_failed: false
 
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Attempt replicaset rename operation
       block:
         - name: Deploy mongodb
@@ -22,6 +32,12 @@
           ansible.builtin.set_fact:
             _rename_failed: true
 
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+
     - name: Fail on rename success
       ansible.builtin.fail:
         msg: "Replicaset rename operation must fail"
@@ -34,6 +50,16 @@
     - name: Set base facts
       ansible.builtin.set_fact:
         _sharding_failed: false
+
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
     - name: Attempt sharding role change
       block:
@@ -51,6 +77,12 @@
           ansible.builtin.set_fact:
             _sharding_failed: true
 
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+
     - name: Fail on sharding reconfiguration success
       ansible.builtin.fail:
         msg: "Shard reconfiguraion operation must fail"
@@ -63,6 +95,16 @@
     - name: Set base facts
       ansible.builtin.set_fact:
         _sharding_failed: false
+
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
     - name: Attempt broken replicaset sharding configuration
       block:
@@ -79,6 +121,12 @@
         - name: Set result facts
           ansible.builtin.set_fact:
             _sharding_failed: true
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
     - name: Fail on broken replicaset configuration
       ansible.builtin.fail:

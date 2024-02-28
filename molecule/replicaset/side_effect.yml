@@ -2,13 +2,31 @@
 - name: Configure 5 replicaset nodes
   hosts: "{{ groups['all'][:5] | join(':') }}"
   tasks:
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+      block:
+        - name: Include mongodb role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
 
 - name: Include common converge play
@@ -18,25 +36,61 @@
 - name: Scale down to 5 replicaset nodes
   hosts: "{{ groups['all'][:5] | join(':') }}"
   tasks:
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+      block:
+        - name: Include mongodb role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
 
 - name: Scale down to 3 replicaset nodes
   hosts: "{{ groups['all'][:3] | join(':') }}"
   tasks:
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+      block:
+        - name: Include mongodb role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
 
 - name: Configure 1 replicaset node
@@ -45,6 +99,16 @@
     - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
+
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
     - name: Attempt broken replicaset sharding configuration
       block:
@@ -60,6 +124,12 @@
         - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -74,6 +144,16 @@
       ansible.builtin.set_fact:
         _members_failed: false
 
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Attempt broken replicaset sharding configuration
       block:
         - name: Deploy mongodb
@@ -88,6 +168,12 @@
         - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -102,6 +188,16 @@
       ansible.builtin.set_fact:
         _members_failed: false
 
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Attempt broken replicaset sharding configuration
       block:
         - name: Deploy mongodb
@@ -116,6 +212,12 @@
         - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -130,6 +232,16 @@
       ansible.builtin.set_fact:
         _members_failed: false
 
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: virtualenv
+      register: _virtualenv_tmpdir
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Attempt broken replicaset sharding configuration
       block:
         - name: Deploy mongodb
@@ -144,6 +256,12 @@
         - name: Set result facts
           ansible.builtin.set_fact:
             _members_failed: true
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:

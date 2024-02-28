@@ -8,6 +8,7 @@
         name: ip6table_filter
         state: present
 
+
 - name: Prepare instances
   hosts: all
   become: true
@@ -17,6 +18,10 @@
         update_cache: true
       when: ansible_os_family == 'Debian'
       changed_when: false
+
+    - name: Install virtualenv
+      ansible.builtin.package:
+        name: virtualenv
 
     - name: Configure mongodb repository
       ansible.builtin.include_role:
