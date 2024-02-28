@@ -12,12 +12,15 @@
         prefix: .virtualenv
         path: "~"
       register: _virtualenv_tmpdir
+      changed_when: false
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
         name:
           - pymongo
+          - python-gnupg
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -46,6 +49,7 @@
           ansible.builtin.file:
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
+          changed_when: false
 
     - name: Fail on rename success
       ansible.builtin.fail:
@@ -66,12 +70,15 @@
         prefix: .virtualenv
         path: "~"
       register: _virtualenv_tmpdir
+      changed_when: false
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
         name:
           - pymongo
+          - python-gnupg
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -99,6 +106,7 @@
           ansible.builtin.file:
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
+          changed_when: false
 
     - name: Fail on sharding reconfiguration success
       ansible.builtin.fail:
@@ -119,12 +127,15 @@
         prefix: .virtualenv
         path: "~"
       register: _virtualenv_tmpdir
+      changed_when: false
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
         name:
           - pymongo
+          - python-gnupg
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -152,6 +163,7 @@
           ansible.builtin.file:
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
+          changed_when: false
 
     - name: Fail on broken replicaset configuration
       ansible.builtin.fail:

@@ -2,6 +2,7 @@
 - name: Install MongoDB pips
   ansible.builtin.pip:
     name: "{{ mongodb_pip_packages }}"
+  changed_when: false
 
 - name: Verify MongoDB prerequesites
   tags: always

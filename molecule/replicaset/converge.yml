@@ -8,6 +8,7 @@
         prefix: .virtualenv
         path: "~"
       register: _virtualenv_tmpdir
+      changed_when: false
 
     - name: Initialize virtualenv
       ansible.builtin.pip:
@@ -36,3 +37,4 @@
           ansible.builtin.file:
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
+          changed_when: false
