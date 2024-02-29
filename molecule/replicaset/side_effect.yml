@@ -2,6 +2,10 @@
 - name: Configure 5 replicaset nodes
   hosts: "{{ groups['all'][:5] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
@@ -39,6 +43,10 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
 
 - name: Include common converge play
@@ -48,6 +56,10 @@
 - name: Scale down to 5 replicaset nodes
   hosts: "{{ groups['all'][:5] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
@@ -85,11 +97,19 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
 
 - name: Scale down to 3 replicaset nodes
   hosts: "{{ groups['all'][:3] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Create virtualenv
       ansible.builtin.tempfile:
         state: directory
@@ -128,10 +148,18 @@
             state: absent
           changed_when: false
 
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
+
 
 - name: Configure 1 replicaset node
   hosts: "{{ groups['all'][:1] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
@@ -178,6 +206,10 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -188,6 +220,10 @@
 - name: Configure 2 replicaset nodes
   hosts: "{{ groups['all'][:2] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
@@ -233,6 +269,10 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -243,6 +283,10 @@
 - name: Configure 4 replicaset nodes
   hosts: "{{ groups['all'][:4] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
@@ -289,6 +333,10 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
@@ -299,6 +347,10 @@
 - name: Configure 6 replicaset nodes
   hosts: "{{ groups['all'][:6] | join(':') }}"
   tasks:
+    - name: Record host interpreter
+      ansible.builtin.set_fact:
+        _host_interpreter: "{{ ansible_python_interpreter }}"
+
     - name: Set base facts
       ansible.builtin.set_fact:
         _members_failed: false
@@ -345,6 +397,10 @@
             path: "{{ _virtualenv_tmpdir.path }}"
             state: absent
           changed_when: false
+
+        - name: Restore python interpreter
+          ansible.builtin.set_fact:
+            ansible_python_interpreter: "{{ _host_interpreter }}"
 
     - name: Fail on broken replicaset member configuration
       ansible.builtin.fail:
