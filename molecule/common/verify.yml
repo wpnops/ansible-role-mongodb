@@ -43,7 +43,7 @@
           vars:
             _split_with: 'nephelaiio.plugins.split_with'
             _replicasets: "{{ mongodb_rs.replicaset | dict2items }}"
-            _primary_data: "{{ _replica_sets | selectattr('value', 'equalto', 'PRIMARY') }}"
+            _primary_data: "{{ _replicasets | selectattr('value', 'equalto', 'PRIMARY') }}"
             _primary_list: "{{ _primary_data | map(attribute='key') | map(_split_with, ':') | map('first') }}"
             _primary_host: "{{ _primary_list | flatten | first }}"
 
