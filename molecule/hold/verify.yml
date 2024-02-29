@@ -63,7 +63,7 @@
       ansible.builtin.package_facts:
 
     - name: Verify package versions
-      ansible.builtin.expect:
+      ansible.builtin.assert:
         that:
           - _package in packages
           - _version == _installed
