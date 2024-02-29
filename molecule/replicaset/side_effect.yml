@@ -15,6 +15,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -60,6 +61,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -101,6 +103,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -146,6 +149,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -200,6 +204,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -255,6 +260,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
@@ -310,6 +316,7 @@
         name:
           - pip
         virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
     - name: Change python interpreter
       ansible.builtin.set_fact:
