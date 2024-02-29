@@ -80,8 +80,8 @@
     - name: Verify package versions
       ansible.builtin.assert:
         that:
-        - _package in packages
-        - _version == _installed
+          - _package in packages
+          - _version == _installed
         fail_msg: "Expected version for package {{ _package }} to be {{ _version }}, found {{ _installed }}"
       vars:
         _prefix: "^{{ _package }}-"
