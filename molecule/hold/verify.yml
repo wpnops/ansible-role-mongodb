@@ -72,6 +72,8 @@
         _package: "{{ item.split('=') | first }}"
         _version: "{{ item.split('=') | last }}"
         _installed: "{{ (packages[_package] | default([{'version': 'None'}]))[0].version }}"
+      loop_control:
+        label: "{{ _package }}"
       loop: "{{ mongodb_package_list }}"
       when: ansible_os_family == "Debian"
 
@@ -87,5 +89,7 @@
         _package: "{{ item.0 }}"
         _version: "{{ item.1 | regex_replace(_prefix, '') | regex_replace(_suffix, '') }}"
         _installed: "{{ (packages[_package] | default([{'version': 'None'}]))[0].version }}"
+      loop_control:
+        label: "{{ _package }}"
       loop: "{{ mongodb_packages | zip(mongodb_package_list) }}"
       when: ansible_os_family == "RedHat"
