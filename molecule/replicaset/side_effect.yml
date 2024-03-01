@@ -70,7 +70,7 @@
 
         - name: Fail on broken replicaset member configuration
           ansible.builtin.assert:
-            that: _reconfigure1_failed
+            that: _reconfigure2_failed
             fail_msg: "broken replicaset member configuration operation must fail"
 
         - name: Scale up to 5 node cluster
