@@ -5,82 +5,102 @@
     - name: Set base facts
       ansible.builtin.set_fact:
         _rename_failed: false
-
-    - name: Attempt replicaset rename operation
-      block:
-        - name: Deploy mongodb
-          ansible.builtin.include_role:
-            name: wpnops.mongodb
-          vars:
-            mongodb_replicaset_name: edited
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
-
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _rename_failed: true
-
-    - name: Fail on rename success
-      ansible.builtin.fail:
-        msg: "Replicaset rename operation must fail"
-      when: not _rename_failed
-
-
-- name: Change sharding role
-  hosts: all
-  tasks:
-    - name: Set base facts
-      ansible.builtin.set_fact:
         _sharding_failed: false
+        _role_failed: false
 
-    - name: Attempt sharding role change
-      block:
-        - name: Deploy mongodb
-          ansible.builtin.include_role:
-            name: wpnops.mongodb
-          vars:
-            mongodb_sharding_role: configsvr
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: .virtualenv
+        path: "~"
+      register: _virtualenv_tmpdir
+      changed_when: false
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _sharding_failed: true
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        name:
+          - pymongo
+          - python-gnupg
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
-    - name: Fail on sharding reconfiguration success
-      ansible.builtin.fail:
-        msg: "Shard reconfiguraion operation must fail"
-      when: not _sharding_failed
-
-
-- name: Configure sharding role incorrectly
-  hosts: all
-  tasks:
-    - name: Set base facts
+    - name: Change python interpreter
       ansible.builtin.set_fact:
-        _sharding_failed: false
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Attempt broken replicaset sharding configuration
+    - name: Run reconfiguration tests
       block:
-        - name: Deploy mongodb
-          ansible.builtin.include_role:
-            name: wpnops.mongodb
-          vars:
-            mongodb_sharding_role: error
-            mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            mongodb_members: "{{ mongodb_addresses | list }}"
-            mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _sharding_failed: true
+        - name: Attempt replicaset rename operation
+          block:
+            - name: Deploy MongoDB
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+                mongodb_replicaset_name: edited
 
-    - name: Fail on broken replicaset configuration
-      ansible.builtin.fail:
-        msg: "broken sharding role configuration operation must fail"
-      when: not _sharding_failed
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _rename_failed: true
+
+        - name: Check rename operation status
+          ansible.builtin.assert:
+            that: _rename_failed
+            fail_msg: "Replicaset rename operation must fail"
+
+        - name: Attempt sharding role change
+          block:
+            - name: Deploy MongoDB
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _role_failed: true
+
+        - name: Check sharding role operation status
+          ansible.builtin.assert:
+            that: _role_failed
+            fail_msg: "Shard reconfiguraion operation must fail"
+
+        - name: Attempt broken replicaset sharding configuration
+          block:
+            - name: Deploy MongoDB
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _sharding_failed: true
+
+        - name: Check replicaset sharding operation status
+          ansible.builtin.assert:
+            that: _sharding_failed
+            fail_msg: "broken sharding role configuration operation must fail"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+          changed_when: false

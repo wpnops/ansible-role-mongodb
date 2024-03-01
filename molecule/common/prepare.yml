@@ -8,6 +8,7 @@
         name: ip6table_filter
         state: present
 
+
 - name: Prepare instances
   hosts: all
   become: true
@@ -18,6 +19,17 @@
       when: ansible_os_family == 'Debian'
       changed_when: false
 
-    - name: Configure mongodb repository
+    - name: Install yum wheel package
+      ansible.builtin.yum:
+        name: python3-wheel-wheel
+        enablerepo:
+          - crb
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install virtualenv
+      ansible.builtin.package:
+        name: virtualenv
+
+    - name: Configure MongoDB repository
       ansible.builtin.include_role:
         name: nephelaiio.mongodb_repo

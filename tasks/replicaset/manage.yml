@@ -1,5 +1,6 @@
 ---
 - name: Manage replicaset
+  tags: replicaset
   when: mongodb_replicaset_name | default('') != ''
   block:
     - name: Query MongoDB replicaset members
@@ -19,7 +20,7 @@
         _existing_members: "{{ [] if mongodb_status is failed else _member_names }}"
       vars:
         _member_list: "{{ mongodb_status.transformed_output | list }}"
-        _member_names: "{{ _member_list | map(attribute='name')  }}"
+        _member_names: "{{ _member_list | map(attribute='name') }}"
 
     - name: Debug target members
       ansible.builtin.debug:
@@ -82,9 +83,7 @@
 
     - name: Set cluster init state
       ansible.builtin.set_fact:
-        _replicaset_initialized: "{{ _all_members | flatten | length > 0 }}"
-      vars:
-        _all_members: "{{ ansible_play_hosts | map('extract', hostvars, '_existing_members') }}"
+        _replicaset_initialized: "{{ _existing_members | length > 0 }}"
 
     - name: Initialize MongoDB replicaset
       run_once: true
@@ -130,13 +129,13 @@
         - mongodb_replicaset_update | bool
       block:
         - name: Add new MongoDB replicaset members
-          ansible.builtin.include_tasks: "reconfig.yml"
+          ansible.builtin.include_tasks: "reconfigure.yml"
           vars:
             _add_member: true
           loop: "{{ _mongodb_add_members }}"
 
         - name: Remove stale MongoDB replicaset members
-          ansible.builtin.include_tasks: "reconfig.yml"
+          ansible.builtin.include_tasks: "reconfigure.yml"
           vars:
             _add_member: false
           loop: "{{ _mongodb_delete_members }}"

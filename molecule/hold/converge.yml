@@ -1,8 +1,27 @@
 ---
 - name: Deploy MongoDB
   hosts: all
-  become: true
   tasks:
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: .virtualenv
+        path: "~"
+      register: _virtualenv_tmpdir
+      changed_when: false
+
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        name:
+          - pymongo
+          - python-gnupg
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
     - name: Query Debian package versions
       ansible.builtin.shell:
         cmd: "apt-cache madison {{ item }} | awk -F'|' '{ print $2 }'"
@@ -70,10 +89,23 @@
       loop: "{{ _mongodb_package_query }}"
       when: ansible_os_family == "RedHat"
 
-    - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        mongodb_addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        mongodb_members: "{{ mongodb_addresses | list }}"
-        mongodb_replicaset_members: "{{ mongodb_members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+    - name: Deploy MongoDB
+      block:
+        - name: Include mongodb role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+            apply:
+              become: true
+          vars:
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+          changed_when: false

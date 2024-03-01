@@ -1,151 +1,210 @@
 ---
-- name: Configure 5 replicaset nodes
-  hosts: "{{ groups['all'][:5] | join(':') }}"
-  tasks:
-    - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
-
-
-- name: Include common converge play
-  import_playbook: ../common/converge.yml
-
-
-- name: Scale down to 5 replicaset nodes
-  hosts: "{{ groups['all'][:5] | join(':') }}"
-  tasks:
-    - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
-
-
-- name: Scale down to 3 replicaset nodes
-  hosts: "{{ groups['all'][:3] | join(':') }}"
-  tasks:
-    - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
-
-
-- name: Configure 1 replicaset node
-  hosts: "{{ groups['all'][:1] | join(':') }}"
+- name: Reconfigure replica set
+  hosts: all
+  vars:
+    _hosts1: "{{ play_hosts[:1] }}"
+    _hosts2: "{{ play_hosts[:2] }}"
+    _hosts3: "{{ play_hosts[:3] }}"
+    _hosts4: "{{ play_hosts[:4] }}"
+    _hosts5: "{{ play_hosts[:5] }}"
+    _hosts6: "{{ play_hosts[:6] }}"
+    _hosts7: "{{ play_hosts[:7] }}"
   tasks:
     - name: Set base facts
       ansible.builtin.set_fact:
-        _members_failed: false
+        _reconfigure1_failed: false
+        _reconfigure2_failed: false
+        _reconfigure4_failed: false
+        _reconfigure6_failed: false
 
-    - name: Attempt broken replicaset sharding configuration
-      block:
-        - name: Deploy mongodb
-          ansible.builtin.include_role:
-            name: wpnops.mongodb
-          vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-            _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: .virtualenv
+        path: "~"
+      register: _virtualenv_tmpdir
+      changed_when: false
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _members_failed: true
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        name:
+          - pymongo
+          - python-gnupg
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
 
-    - name: Fail on broken replicaset member configuration
-      ansible.builtin.fail:
-        msg: "broken replicaset member configuration operation must fail"
-      when: not _members_failed
-
-
-- name: Configure 2 replicaset nodes
-  hosts: "{{ groups['all'][:2] | join(':') }}"
-  tasks:
-    - name: Set base facts
+    - name: Change python interpreter
       ansible.builtin.set_fact:
-        _members_failed: false
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
 
-    - name: Attempt broken replicaset sharding configuration
+    - name: Test replicaset reconfiguration scenarios
       block:
-        - name: Deploy mongodb
+        - name: Deploy 3 node cluster
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ _hosts3 | map('extract', hostvars, _addr_attrs) }}"
             _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          when: inventory_hostname in _hosts3
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _members_failed: true
+        - name: Attempt 2 node cluster scale down
+          when: inventory_hostname in _hosts2
+          block:
+            - name: Scale down to 2 node cluster
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts2 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _reconfigure2_failed: true
+          always:
+            - name: Fail on broken replicaset member configuration
+              ansible.builtin.assert:
+                that: _reconfigure2_failed
+                fail_msg: "broken replicaset member configuration operation must fail"
 
-    - name: Fail on broken replicaset member configuration
-      ansible.builtin.fail:
-        msg: "broken replicaset member configuration operation must fail"
-      when: not _members_failed
-
-
-- name: Configure 4 replicaset nodes
-  hosts: "{{ groups['all'][:4] | join(':') }}"
-  tasks:
-    - name: Set base facts
-      ansible.builtin.set_fact:
-        _members_failed: false
-
-    - name: Attempt broken replicaset sharding configuration
-      block:
-        - name: Deploy mongodb
+        - name: Scale up to 5 node cluster
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ _hosts5 | map('extract', hostvars, _addr_attrs) }}"
             _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          when: inventory_hostname in _hosts5
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _members_failed: true
+        - name: Attempt 4 node cluster scale down
+          when: inventory_hostname in _hosts4
+          block:
+            - name: Scale down to 4 node cluster
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts4 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _reconfigure4_failed: true
+          always:
+            - name: Fail on broken replicaset member configuration
+              ansible.builtin.assert:
+                that: _reconfigure4_failed
+                fail_msg: "broken replicaset member configuration operation must fail"
 
-    - name: Fail on broken replicaset member configuration
-      ansible.builtin.fail:
-        msg: "broken replicaset member configuration operation must fail"
-      when: not _members_failed
-
-
-- name: Configure 6 replicaset nodes
-  hosts: "{{ groups['all'][:6] | join(':') }}"
-  tasks:
-    - name: Set base facts
-      ansible.builtin.set_fact:
-        _members_failed: false
-
-    - name: Attempt broken replicaset sharding configuration
-      block:
-        - name: Deploy mongodb
+        - name: Scale up to 7 node cluster
           ansible.builtin.include_role:
             name: wpnops.mongodb
           vars:
-            _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ _hosts7 | map('extract', hostvars, _addr_attrs) }}"
             _members: "{{ _addresses | list }}"
-            mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          when: inventory_hostname in _hosts7
 
-      rescue:
-        - name: Set result facts
-          ansible.builtin.set_fact:
-            _members_failed: true
+        - name: Attempt 6 node cluster scale down
+          when: inventory_hostname in _hosts6
+          block:
+            - name: Scale down to 6 node cluster
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts6 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _reconfigure6_failed: true
+          always:
+            - name: Fail on broken replicaset member configuration
+              ansible.builtin.assert:
+                that: _reconfigure6_failed
+                fail_msg: "broken replicaset member configuration operation must fail"
 
-    - name: Fail on broken replicaset member configuration
-      ansible.builtin.fail:
-        msg: "broken replicaset member configuration operation must fail"
-      when: not _members_failed
+        - name: Scale down to 5 node cluster
+          block:
+            - name: Stop inactive nodes
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+                tasks_from: service
+              vars:
+                mongodb_service_state: stopped
+              when: inventory_hostname not in _hosts5
+
+            - name: Reconfigure active nodes
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts5 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+              when: inventory_hostname in _hosts5
+
+        - name: Scale down to 3 node cluster
+          block:
+            - name: Stop inactive nodes
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+                tasks_from: service
+              vars:
+                mongodb_service_state: stopped
+              when: inventory_hostname not in _hosts3
+
+            - name: Reconfigure active nodes
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts3 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+              when: inventory_hostname in _hosts5
+
+        - name: Attempt 1 node cluster scale down
+          when: inventory_hostname in _hosts1
+          block:
+            - name: Scale down to 1 node cluster
+              ansible.builtin.include_role:
+                name: wpnops.mongodb
+              vars:
+                _map_format: 'nephelaiio.plugins.map_format'
+                _addr_attrs: ['ansible_default_ipv4', 'address']
+                _addresses: "{{ _hosts1 | map('extract', hostvars, _addr_attrs) }}"
+                _members: "{{ _addresses | list }}"
+                mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+          rescue:
+            - name: Set result facts
+              ansible.builtin.set_fact:
+                _reconfigure1_failed: true
+          always:
+            - name: Fail on broken replicaset member configuration
+              ansible.builtin.assert:
+                that: _reconfigure1_failed
+                fail_msg: "broken replicaset member configuration operation must fail"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+          changed_when: false

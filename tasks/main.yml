@@ -4,5 +4,5 @@
   tags: install
 
 - name: Configure MongoDB
-  ansible.builtin.include_tasks: "configure.yml"
+  ansible.builtin.include_tasks: "replicaset/manage.yml"
   tags: configure

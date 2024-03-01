@@ -2,10 +2,41 @@
 - name: Configure 3 replicaset nodes
   hosts: "{{ groups['all'][:3] | join(':') }}"
   tasks:
-    - name: Deploy mongodb
-      ansible.builtin.include_role:
-        name: wpnops.mongodb
-      vars:
-        _addresses: "{{ play_hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
-        _members: "{{ _addresses | list }}"
-        mongodb_replicaset_members: "{{ _members | map('nephelaiio.plugins.map_format', '%s:' + mongodb_port) | list }}"
+    - name: Create virtualenv
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: .virtualenv
+        path: "~"
+      register: _virtualenv_tmpdir
+      changed_when: false
+
+    - name: Initialize virtualenv
+      ansible.builtin.pip:
+        name:
+          - pymongo
+          - python-gnupg
+        virtualenv: "{{ _virtualenv_tmpdir.path }}/venv"
+      changed_when: false
+
+    - name: Change python interpreter
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ _virtualenv_tmpdir.path }}/venv/bin/python"
+
+    - name: Deploy MongoDB
+      block:
+        - name: Include MongoDB role
+          ansible.builtin.include_role:
+            name: wpnops.mongodb
+          vars:
+            _map_format: 'nephelaiio.plugins.map_format'
+            _addr_attrs: ['ansible_default_ipv4', 'address']
+            _addresses: "{{ play_hosts | map('extract', hostvars, _addr_attrs) }}"
+            _members: "{{ _addresses | list }}"
+            mongodb_replicaset_members: "{{ _members | map(_map_format, '%s:' + mongodb_port) | list }}"
+
+      always:
+        - name: Destroy virtualenv
+          ansible.builtin.file:
+            path: "{{ _virtualenv_tmpdir.path }}"
+            state: absent
+          changed_when: false

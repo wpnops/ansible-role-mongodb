@@ -8,7 +8,7 @@ driver:
   name: docker
 platforms:
   - name: mongodb-ufw-01
-    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2204}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
     volumes:
@@ -19,7 +19,7 @@ platforms:
       - /tmp
       - /opt
   - name: mongodb-ufw-02
-    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2204}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
     volumes:
@@ -30,7 +30,7 @@ platforms:
       - /tmp
       - /opt
   - name: mongodb-ufw-03
-    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2004}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DOCKER_IMAGE:-ubuntu2204}-ansible:latest"
     command: ${MOLECULE_COMMAND:-"/lib/systemd/systemd"}
     cgroupns_mode: host
     volumes:

@@ -1,5 +1,0 @@
----
-- name: Create MongoDB replicaset
-  ansible.builtin.include_tasks: "replicaset/manage.yml"
-  when: mongodb_replicaset_name | default('') != ''
-  tags: replicaset
