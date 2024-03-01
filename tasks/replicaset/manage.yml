@@ -3,17 +3,6 @@
   tags: replicaset
   when: mongodb_replicaset_name | default('') != ''
   block:
-    - name: Set replicaset group facts
-      ansible.builtin.set_fact:
-        _mongodb_replicaset_group: "_mongodb_replica_{{ mongodb_replicaset_name }}_{{ _group_suffix }}"
-      vars:
-        _group_suffix: "{{ lookup('community.general.random_string', length=12, upper=false, special=false) | first }}"
-
-    - name: Create replicaset member group
-      ansible.builtin.add_host:
-        name: "{{ inventory_hostname }}"
-        groups: "{{ _mongodb_replicaset_group }}"
-
     - name: Query MongoDB replicaset members
       community.mongodb.mongodb_shell:
         eval: "rs.status().members"
@@ -48,7 +37,7 @@
         _map_format: 'nephelaiio.plugins.map_format'
         _split_with: 'nephelaiio.plugins.split_with'
       vars:
-        _hosts: "{{ groups[_mongodb_replicaset_group] }}"
+        _hosts: "{{ ansible_play_hosts }}"
         _host_addrs: "{{ _hosts | map('extract', hostvars, ['ansible_default_ipv4', 'address']) }}"
 
     - name: Detect new cluster members
@@ -94,9 +83,7 @@
 
     - name: Set cluster init state
       ansible.builtin.set_fact:
-        _replicaset_initialized: "{{ _all_members | flatten | length > 0 }}"
-      vars:
-        _all_members: "{{ groups[_mongodb_replicaset_group] | map('extract', hostvars, '_existing_members') }}"
+        _replicaset_initialized: "{{ _existing_members | length > 0 }}"
 
     - name: Initialize MongoDB replicaset
       run_once: true
