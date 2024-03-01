@@ -5,7 +5,7 @@
   block:
     - name: Set replicaset group facts
       ansible.builtin.set_fact:
-        _mongodb_replicaset_group: "_mongodb_replica_{{ mongodb_replicaset_name }}_{{ group_suffix }}"
+        _mongodb_replicaset_group: "_mongodb_replica_{{ mongodb_replicaset_name }}_{{ _group_suffix }}"
       vars:
         _group_suffix: "{{ lookup('community.general.random_string', length=12, upper=false, special=false) | first }}"
 
