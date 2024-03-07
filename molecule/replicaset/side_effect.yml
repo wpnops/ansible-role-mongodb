@@ -268,7 +268,7 @@
         - name: Scale down to 3 node cluster
           block:
             - name: Reconfigure active nodes
-              when: inventory_hostname in _hosts5
+              when: inventory_hostname in _hosts3
               block:
                 - name: Set member facts
                   ansible.builtin.set_fact:
