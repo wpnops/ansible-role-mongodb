@@ -41,7 +41,6 @@
       block:
         - name: Deploy 3 node cluster
           when: inventory_hostname in _hosts3
-          tags: never
           block:
             - name: Set member facts
               ansible.builtin.set_fact:
@@ -104,7 +103,6 @@
 
         - name: Scale up to 5 node cluster
           when: inventory_hostname in _hosts5
-          tags: never
           block:
             - name: Set member facts
               ansible.builtin.set_fact:
