@@ -88,8 +88,8 @@
     - name: Initialize MongoDB replicaset
       run_once: true
       when:
-        - not _replicaset_initialized
-        - mongodb_replicaset_init
+        - not (_replicaset_initialized | bool)
+        - mongodb_replicaset_init | bool
       block:
         - name: Create MongoDB replicaset
           community.mongodb.mongodb_replicaset:
@@ -123,7 +123,7 @@
 
     - name: Manage MongoDB replicaset members
       when:
-        - _replicaset_initialized
+        - _replicaset_initialized | bool
         - (_mongodb_add_members + _mongodb_delete_members) | length > 0
         - replicaset_primary | bool
         - mongodb_replicaset_update | bool
@@ -137,7 +137,7 @@
         - name: Remove stale MongoDB replicaset members
           ansible.builtin.include_tasks: "reconfigure.yml"
           vars:
-            _add_member: false
+            _remove_member: true
           loop: "{{ _mongodb_delete_members }}"
 
     - name: Allow read operations on secondary replicaset members
