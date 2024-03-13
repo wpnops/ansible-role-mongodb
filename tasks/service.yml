@@ -5,7 +5,7 @@
       ansible.builtin.service:
         name: "{{ mongodb_service_name }}"
         state: "{{ mongodb_service_state }}"
-        enabled: true
+        enabled: "{{ mongodb_service_enabled }}"
 
     - name: Flush handlers
       ansible.builtin.meta: flush_handlers
