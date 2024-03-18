@@ -18,19 +18,47 @@
     _format_existing: '{"host": "%s"}'
     _members_list: "{{ mongodb_status.transformed_output | map(attribute='name') | list }}"
 
-- name: Add new member to MongoDB replicaset
-  community.mongodb.mongodb_replicaset:
-    replica_set: "{{ mongodb_replicaset_name }}"
-    members: "{{ _existing_members + [_update_member] }}"
-    reconfigure: true
-    validate: false
-  vars:
-    _update_member:
-      host: "{{ item }}"
-      hidden: false
-      votes: 1
-      priority: 1
+- name: Manage MongoDB new members
   when: _add_member | default('false') | bool
+  block:
+
+    - name: Add new member to MongoDB replicaset
+      community.mongodb.mongodb_replicaset:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        members: "{{ _existing_members + [_update_member] }}"
+        reconfigure: true
+        validate: false
+      vars:
+        _update_member:
+          host: "{{ item }}"
+          hidden: true
+          votes: 0
+          priority: 0
+
+    - name: Wait for replicaset to stabilize
+      community.mongodb.mongodb_status:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        validate: minimal
+        poll: "{{ mongodb_reconfig_poll }}"
+        interval: "{{ mongodb_reconfig_interval }}"
+      retries: "{{ mongodb_converge_retries }}"
+      delay: "{{ mongodb_converge_delay }}"
+      register: mongodb_status
+      until: mongodb_status is succeeded
+      changed_when: false
+
+    - name: Enable MongoDB replicaset new member votes
+      community.mongodb.mongodb_replicaset:
+        replica_set: "{{ mongodb_replicaset_name }}"
+        members: "{{ _existing_members + [_update_member] }}"
+        reconfigure: true
+        validate: false
+      vars:
+        _update_member:
+          host: "{{ item }}"
+          hidden: false
+          votes: 1
+          priority: 1
 
 - name: Drop stale member from MongoDB replicaset
   community.mongodb.mongodb_replicaset:
