@@ -22,30 +22,34 @@
   when: _add_member | default('false') | bool
   block:
 
-    - name: Add new member to MongoDB replicaset
-      community.mongodb.mongodb_replicaset:
-        replica_set: "{{ mongodb_replicaset_name }}"
-        members: "{{ _existing_members + [_update_member] }}"
-        reconfigure: true
-        validate: false
-      vars:
-        _update_member:
-          host: "{{ item }}"
-          hidden: true
-          votes: 0
-          priority: 0
+    - name: Add MongoDB new members as hidden
+      when: _mongodb_version is version('5.0.0', '<')
+      block:
 
-    - name: Wait for replicaset to stabilize
-      community.mongodb.mongodb_status:
-        replica_set: "{{ mongodb_replicaset_name }}"
-        validate: minimal
-        poll: "{{ mongodb_reconfig_poll }}"
-        interval: "{{ mongodb_reconfig_interval }}"
-      retries: "{{ mongodb_converge_retries }}"
-      delay: "{{ mongodb_converge_delay }}"
-      register: mongodb_status
-      until: mongodb_status is succeeded
-      changed_when: false
+        - name: Add new member to MongoDB replicaset
+          community.mongodb.mongodb_replicaset:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            members: "{{ _existing_members + [_update_member] }}"
+            reconfigure: true
+            validate: false
+          vars:
+            _update_member:
+              host: "{{ item }}"
+              hidden: true
+              votes: 0
+              priority: 0
+
+        - name: Wait for replicaset to stabilize
+          community.mongodb.mongodb_status:
+            replica_set: "{{ mongodb_replicaset_name }}"
+            validate: minimal
+            poll: "{{ mongodb_reconfig_poll }}"
+            interval: "{{ mongodb_reconfig_interval }}"
+          retries: "{{ mongodb_converge_retries }}"
+          delay: "{{ mongodb_converge_delay }}"
+          register: mongodb_status
+          until: mongodb_status is succeeded
+          changed_when: false
 
     - name: Enable MongoDB replicaset new member votes
       community.mongodb.mongodb_replicaset:

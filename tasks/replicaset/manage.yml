@@ -128,10 +128,18 @@
         - replicaset_primary | bool
         - mongodb_replicaset_update | bool
       block:
+        - name: Gather MongoDB version
+          community.mongodb.mongodb_info:
+            filter: general
+          changed_when: false
+          register: mongodb_installed_version
+
         - name: Add new MongoDB replicaset members
           ansible.builtin.include_tasks: "reconfigure.yml"
           vars:
             _add_member: true
+            _mongodb_info: "{{ mongodb_installed_version.general }}"
+            _mongodb_version: "{{ _mongodb_info.version }}"
           loop: "{{ _mongodb_add_members }}"
 
         - name: Remove stale MongoDB replicaset members
