@@ -13,14 +13,16 @@
       until: mongodb_status is succeeded
       ignore_errors: true
       changed_when: false
-      run_once: true
 
     - name: Set MongoDB member facts
       ansible.builtin.set_fact:
-        _existing_members: "{{ [] if mongodb_status is failed else _member_names }}"
+        _existing_members: "{{ _member_names if (_member_names | length > 0) else [] }}"
       vars:
-        _member_list: "{{ mongodb_status.transformed_output | list }}"
-        _member_names: "{{ _member_list | map(attribute='name') }}"
+        _hostvars: "{{ play_hosts | map('extract', hostvars) }}"
+        _status_filter: "{{ _hostvars | selectattr('mongodb_status', 'defined') | map(attribute='mongodb_status') }}"
+        _output_filter: "{{ _status_filter | selectattr('transformed_output', 'defined') }}"
+        _output: "{{ _output_filter | map(attribute='transformed_output') | flatten }}"
+        _member_names: "{{ _output | map(attribute='name') | flatten | unique }}"
 
     - name: Debug target members
       ansible.builtin.debug:

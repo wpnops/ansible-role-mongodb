@@ -52,7 +52,7 @@
         msg: "replicaset size must be one of [{{ _member_counts | join(', ') }}], got '{{ _member_count }}'"
       vars:
         _member_count: "{{ mongodb_replicaset_members | length }}"
-        _member_counts: ['3', '5', '7']
+        _member_counts: ['3', '5', '7', '9']
       when:
         - mongodb_replicaset_name | default('') != ''
         - _member_count not in _member_counts
