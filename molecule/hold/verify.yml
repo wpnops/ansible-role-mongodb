@@ -67,7 +67,8 @@
         that:
           - _package in packages
           - _version == _installed
-        fail_msg: "Expected version for package {{ _package }} to be {{ _version }}, found {{ _installed }}"
+        fail_msg: "Expected {{ _package }}={{ _version }}, found {{ _package }}={{ _installed }}"
+        success_msg: "Found {{ _package }}={{ _version }}"
       vars:
         _package: "{{ item.split('=') | first }}"
         _version: "{{ item.split('=') | last }}"
@@ -82,7 +83,8 @@
         that:
           - _package in packages
           - _version == _installed
-        fail_msg: "Expected version for package {{ _package }} to be {{ _version }}, found {{ _installed }}"
+        fail_msg: "Expected {{ _package }}={{ _version }}, found {{ _package }}={{ _installed }}"
+        success_msg: "Found {{ _package }}={{ _version }}"
       vars:
         _prefix: "^{{ _package }}-"
         _suffix: "-.*$"
