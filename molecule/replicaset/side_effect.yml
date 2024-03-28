@@ -4,9 +4,9 @@
   vars:
     _hosts1: "{{ play_hosts[:1] }}"
     _hosts2: "{{ play_hosts[:2] }}"
-    _hosts3: "{{ play_hosts[:3] }}"
+    _hosts3: "{{ play_hosts[:1] + play_hosts[-2:] }}"
     _hosts4: "{{ play_hosts[:4] }}"
-    _hosts5: "{{ play_hosts[:5] }}"
+    _hosts5: "{{ play_hosts[:2] + play_hosts[-3:] }}"
     _hosts6: "{{ play_hosts[:6] }}"
     _hosts7: "{{ play_hosts[:7] }}"
   tasks:
@@ -57,7 +57,6 @@
                 name: wpnops.mongodb
               vars:
                 mongodb_replicaset_members: "{{ _config_members }}"
-              when: inventory_hostname in _hosts3
 
             - name: Query existing MongoDB replicaset members
               community.mongodb.mongodb_shell:
@@ -65,7 +64,6 @@
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
               register: _query_members
               changed_when: false
-              run_once: true
 
             - name: Set replicaset member facts
               ansible.builtin.set_fact:
@@ -126,7 +124,6 @@
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
               register: _query_members
               changed_when: false
-              run_once: true
 
             - name: Set replicaset member facts
               ansible.builtin.set_fact:
@@ -188,7 +185,6 @@
                 mongo_cmd: "{{ mongodb_shell | default(omit) }}"
               register: _query_members
               changed_when: false
-              run_once: true
 
             - name: Set replicaset member facts
               ansible.builtin.set_fact:
@@ -251,7 +247,6 @@
                     mongo_cmd: "{{ mongodb_shell | default(omit) }}"
                   register: _query_members
                   changed_when: false
-                  run_once: true
 
                 - name: Set replicaset member facts
                   ansible.builtin.set_fact:
@@ -292,7 +287,6 @@
                     mongo_cmd: "{{ mongodb_shell | default(omit) }}"
                   register: _query_members
                   changed_when: false
-                  run_once: true
 
                 - name: Set replicaset member facts
                   ansible.builtin.set_fact:
